@@ -1,0 +1,185 @@
+# =============================================================================
+# Caja Menor - .gitignore
+# Proyecto: 2026.04.11-caja-menor-actualizada
+# Stack: Python + Flask + SQLite + VS Code + Windows + Git Bash
+# =============================================================================
+
+
+# -----------------------------------------------------------------------------
+# Python: bytecode y caches
+# -----------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+*$py.class
+.python-version
+
+
+# -----------------------------------------------------------------------------
+# Entornos virtuales
+# -----------------------------------------------------------------------------
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+
+# -----------------------------------------------------------------------------
+# Flask y configuracion local sensible
+# -----------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+instance/
+.webassets-cache/
+flask_session/
+
+
+# -----------------------------------------------------------------------------
+# SQLite
+# Se ignoran bases temporales, WAL, SHM y backups.
+# La base principal actual SI queda permitida.
+# -----------------------------------------------------------------------------
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.db-bak
+*.db.backup
+*.bak
+*.backup
+*.sqbpro
+
+!data/
+!data/caja_menor.db
+
+
+# -----------------------------------------------------------------------------
+# Recibos, PDFs, impresion y archivos generados
+# -----------------------------------------------------------------------------
+recibos_pdf/
+recibos_imprimibles/
+*.pdf
+*.tmp.pdf
+*.print.pdf
+*.spool
+*.spl
+*.shd
+~$*
+
+
+# -----------------------------------------------------------------------------
+# Logs y temporales
+# -----------------------------------------------------------------------------
+*.log
+*.tmp
+*.temp
+*.cache
+*~
+tmp/
+temp/
+cache/
+logs/
+log/
+
+
+# -----------------------------------------------------------------------------
+# Exportaciones, reportes y archivos pesados locales
+# -----------------------------------------------------------------------------
+exports/
+export/
+reportes/
+informes/
+salidas/
+output/
+outputs/
+downloads/
+
+*.csv.bak
+*.xlsx
+*.xls
+*.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+*.gz
+
+
+# -----------------------------------------------------------------------------
+# Build, distribucion y empaquetado Python
+# -----------------------------------------------------------------------------
+build/
+dist/
+eggs/
+.eggs/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+
+# -----------------------------------------------------------------------------
+# Pruebas, cobertura y analisis
+# -----------------------------------------------------------------------------
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.hypothesis/
+
+
+# -----------------------------------------------------------------------------
+# VS Code, JetBrains y editores
+# -----------------------------------------------------------------------------
+.vscode/
+.idea/
+*.code-workspace
+*.swp
+*.swo
+*.orig
+*.rej
+
+
+# -----------------------------------------------------------------------------
+# Windows, macOS y archivos del sistema
+# -----------------------------------------------------------------------------
+Thumbs.db
+Thumbs.db:encryptable
+Desktop.ini
+desktop.ini
+ehthumbs.db
+ehthumbs_vista.db
+$RECYCLE.BIN/
+*.lnk
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+
+# -----------------------------------------------------------------------------
+# Herramientas locales del proyecto
+# -----------------------------------------------------------------------------
+.claude/
+.codex/
+DB.Browser.for.SQLite-v3.13.1-win64/
+DB.Browser.for.SQLite-v3.13.1-win64.zip
+
+
+# -----------------------------------------------------------------------------
+# Mantener carpetas importantes si usas .gitkeep
+# -----------------------------------------------------------------------------
+!.gitkeep

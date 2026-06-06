@@ -1,0 +1,99 @@
+EL REDISEÑO CORRECTO DEL PROYECTO
+
+Tu estructura:
+
+proyecto/
+│
+├── main.py
+├── src/
+│   ├── app.py
+│   ├── db.py
+│   ├── ui/
+│   │   ├── dashboard.py
+│   │   ├── resumen.py
+│   │   ├── movimientos.py
+│   │   └── configuracion.py
+│
+├── assets/
+│   ├── icon.ico
+│   └── logo.png
+│
+├── data/
+│   └── caja_menor.db
+
+NO elimina las capas.
+
+AL CONTRARIO:
+
+LAS ORGANIZA.
+
+CÓMO INTERACTÚAN LAS CAPAS
+1. CAPA FINANCIERA
+Archivo afectado
+src/db.py
+Tablas
+movimientos
+items
+responsables
+centro_de_costos
+Funciones
+registrar_movimiento()
+consultar_movimientos_financieros()
+resumen_por_item()
+resumen_por_centro_costos()
+
+Responsabilidad:
+
+✅ dinero
+✅ gastos
+✅ trazabilidad financiera
+
+2. CAPA TÉCNICA
+Archivo afectado
+src/db.py
+Tablas
+unidades_constructivas
+unidades_ejecutadas
+Funciones
+registrar_unidad_ejecutada()
+consultar_unidades_ejecutadas()
+
+Responsabilidad:
+
+✅ producción
+✅ cantidades ejecutadas
+✅ avance físico
+
+3. CAPA DE COSTEO
+Archivo afectado
+src/db.py
+Función
+calcular_costos_unitarios()
+
+Responsabilidad:
+
+Cruzar:
+
+GASTOS
+VS
+PRODUCCIÓN
+
+Aquí ocurre:
+
+distribución proporcional diaria
+4. CAPA ANALÍTICA
+Archivos afectados
+src/app.py
+src/ui/resumen.py
+src/ui/dashboard.py
+Funciones
+generar_resumen_tecnico()
+generar_liquidacion_tecnica()
+
+Responsabilidad:
+
+✅ indicadores
+✅ tablas
+✅ dashboard
+✅ PDF
+✅ costos unitarios

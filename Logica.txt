@@ -1,0 +1,99 @@
+Tu lógica correcta
+SALDO DE CAJA
+saldo =
+    asignaciones
+    + reembolsos
+    + ajustes_positivos
+    - gastos
+    - ajustes_negativos
+COSTO DE OBRA
+
+Aquí es distinto:
+
+costo_obra += gastos
+
+IMPORTANTE:
+
+los reembolsos NO disminuyen costo de obra,
+porque la inversión sí ocurrió.
+Ejemplo completo
+Caja inicial
+ASIGNACION +500.000
+
+Caja:
+
+500.000
+
+Costo obra:
+
+0
+Compra materiales
+GASTO -120.000
+OBRA: TERRABONGA
+
+Caja:
+
+380.000
+
+Costo obra:
+
+120.000
+Empresa repone factura
+REEMBOLSO +120.000
+
+Caja:
+
+500.000
+
+Costo obra:
+
+120.000
+
+Observa:
+
+la caja se recuperó,
+pero la inversión sigue existiendo.
+Entonces NO debes eliminar “Reembolso”
+
+Porque:
+
+“Gasto” = consumo/inversión real.
+“Reembolso” = recuperación operativa de liquidez.
+
+Son dos cosas distintas.
+
+Lo más importante
+
+Tu sistema no es solamente:
+
+ingresos,
+egresos,
+saldo.
+
+Realmente tienes DOS CONTABILIDADES simultáneas:
+
+Control	Objetivo
+Caja menor	Saber cuánto efectivo queda
+Obras	Saber cuánto dinero se invirtió
+
+Y ahí está la clave de toda tu lógica.
+
+La mejor estructura para ti
+Movimiento	Afecta Caja	Afecta Obra
+ASIGNACION	+	No
+GASTO	-	+
+REEMBOLSO	+	No
+AJUSTE	+/-	Opcional
+En resumen
+
+Tu “reembolso”:
+
+no es devolución,
+no es reverso de gasto,
+no cancela el gasto,
+solo recompone el fondo de caja menor.
+
+Por eso:
+
+el gasto sigue acumulándose en la obra,
+mientras la caja recupera disponibilidad.

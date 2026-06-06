@@ -1,0 +1,284 @@
+GESTIÓN DE CAJA MENOR V4
+
+Sistema profesional de control y legalización de caja menor desarrollado en Python, orientado a la administración operativa y financiera de gastos por trabajador y obra.
+
+El sistema permite:
+
+Registrar asignaciones de dinero
+Legalizar gastos por ítems
+Controlar saldos por trabajador y obra
+Generar consecutivos automáticos
+Cerrar obras administrativamente
+Exportar reportes y consecutivos en PDF profesional
+Generar análisis gerenciales y tableros de control
+Características principales
+✅ Gestión de movimientos
+
+El sistema maneja tres tipos principales de movimientos:
+
+Tipo	Descripción
+ASIGNACION	Dinero entregado al trabajador
+GASTO	Legalización de gastos ejecutados
+CIERRE	Cierre administrativo de obra
+✅ Control automático de saldo
+
+El sistema mantiene un saldo dinámico por trabajador y obra:
+
+SALDO = ASIGNACIONES - GASTOS
+
+Incluye validaciones automáticas:
+
+No permite gastar más del saldo disponible
+No permite cerrar obras con saldo pendiente
+Calcula históricos automáticamente
+Controla acumulados por trabajador y obra
+✅ Generación automática de consecutivos
+
+Cada operación genera un consecutivo único:
+
+1001
+1002
+1003
+...
+
+El consecutivo se almacena en:
+
+data/consecutivo.txt
+✅ Exportación PDF profesional
+
+El sistema genera PDFs corporativos con:
+
+Logo empresarial
+Firma digital
+Resumen financiero
+Acumulados históricos
+Top 3 de gastos
+Indicadores porcentuales
+Resumen gerencial
+Costos por unidad constructiva
+
+Ubicación de archivos:
+
+recibos_pdf/consecutivos/
+recibos_pdf/reportes/
+Estructura del proyecto
+proyecto/
+│
+├── data/
+│   ├── movimientos.csv
+│   ├── consecutivo.txt
+│   ├── responsables.csv
+│   ├── obras.csv
+│   ├── tipo_de_movimientos.csv
+│   ├── centro_de_costos.csv
+│   ├── descripciones.csv
+│   └── unidades_constructivas.csv
+│
+├── recibos_pdf/
+│   ├── consecutivos/
+│   └── reportes/
+│
+├── recibos_imprimibles/
+│
+├── Imagenes/
+│   ├── LOGO.JPG
+│   └── FIRMA.JPG
+│
+└── app.py
+Requisitos
+Python
+
+Compatible con:
+
+Python 3.10+
+Librerías necesarias
+
+Instalar dependencias:
+
+pip install reportlab colorama
+Archivos CSV requeridos
+responsables.csv
+id,nombre
+1,JUAN PEREZ
+2,CARLOS RUIZ
+obras.csv
+id,nombre
+1,OBRA NORTE
+2,OBRA SUR
+tipo_de_movimientos.csv
+id,nombre
+1,ASIGNACION
+2,GASTO
+3,CIERRE
+centro_de_costos.csv
+id,nombre
+1,OPERACIONES
+2,MANTENIMIENTO
+descripciones.csv
+id,nombre
+1,MATERIALES
+2,ALIMENTACION
+3,PEAJES
+unidades_constructivas.csv
+id,nombre
+1,POSTES INSTALADOS
+2,RED TENDIDA
+3,EXCAVACION
+Funcionalidades del sistema
+1. Generar consecutivo
+
+Permite registrar:
+
+Asignaciones
+Legalizaciones
+Cierres administrativos
+
+Incluye:
+
+Validación de saldo
+Múltiples ítems por movimiento
+Control histórico
+Exportación PDF
+Acumulados automáticos
+2. Resumen acumulado trabajador
+
+Muestra:
+
+Gastos por ítem
+Gastos por obra
+Saldo disponible
+Total ejecutado
+Históricos acumulados
+3. Resumen por obra
+
+Genera:
+
+Total asignado
+Total ejecutado
+Saldo de obra
+Gastos por trabajador
+Distribución de gastos
+4. Tablero de control
+
+Incluye análisis gerencial tipo BI.
+
+Ranking de obras
+🏗 Obras más costosas
+Ranking de trabajadores
+👷 Trabajadores que más ejecutan gastos
+Top de ítems
+💰 Conceptos más costosos
+Alertas automáticas
+Concentración excesiva de gasto
+Posible fuga de dinero
+Dependencia por trabajador
+Flujo operativo
+ASIGNACIÓN
+EMPRESA → TRABAJADOR
+
+Entrega de dinero.
+
+GASTO
+TRABAJADOR → LEGALIZACIÓN
+
+Descuenta saldo disponible.
+
+CIERRE
+SALDO = 0
+
+La obra queda cerrada administrativamente.
+
+Seguridad lógica incorporada
+Validaciones
+✅ Fecha válida
+✅ Montos numéricos
+✅ No permite gastos negativos
+✅ No permite legalizar sin ítems
+✅ No permite exceder saldo
+✅ No permite cerrar obras con saldo pendiente
+PDFs generados
+
+Los consecutivos incluyen:
+
+Encabezado corporativo
+Logo
+NIT
+Versión documental
+Fecha de generación
+Resumen financiero
+(+) RECIBIDO
+(-) GASTADO
+(=) SALDO
+Top 3 de gastos
+
+Ejemplo:
+
+1. MATERIALES
+2. MANO DE OBRA
+3. PEAJES
+Análisis por unidad constructiva
+
+Ejemplo:
+
+POSTES INSTALADOS
+COSTO PROMEDIO POR UNIDAD
+Menú principal
+=== GESTIÓN DE CAJA MENOR V4 ===
+
+1. Generar consecutivo
+2. Ver resumen trabajador
+3. Ver resumen obra
+4. Tablero control
+5. Ver historial CSV
+6. Salir
+Tecnologías utilizadas
+Tecnología	Uso
+Python	Lógica principal
+CSV	Persistencia de datos
+ReportLab	Generación PDF
+Colorama	Colores en consola
+defaultdict	Acumulados rápidos
+Ejecución del sistema
+
+Ejecutar:
+
+python app.py
+Ejemplo de operación
+1. Registrar asignación
+Tipo: ASIGNACION
+Monto: $500,000
+
+Resultado:
+
+Saldo trabajador = 500,000
+2. Registrar gasto
+MATERIALES = 200,000
+PEAJES = 50,000
+
+Resultado:
+
+Saldo trabajador = 250,000
+3. Cerrar obra
+
+Condición obligatoria:
+
+SALDO = 0
+Posibles mejoras futuras
+Base de datos SQLite
+Interfaz gráfica
+Dashboard web
+Integración SAP
+Control de usuarios
+Firma digital real
+Exportación Excel
+Indicadores KPI
+API REST
+Multiempresa
+Autor
+
+Sistema desarrollado para control operativo de:
+
+Caja menor
+Legalizaciones
+Control de gastos
+Gestión de obras

@@ -1,0 +1,16 @@
+
+--- RECIBO DE LIQUIDACION ---
+RESPONSABLE: AMIN GAMARRA
+PERIODO: 2026-01-01 a 2020-02-12
+OBRA: 15000
+------------------------------
+RESUMEN PARCIAL DE GASTOS:
+------------------------------
+(=) NETO A REEMBOLSAR:      $            0
+0 PESOS COP
+------------------------------
+RESUMEN HISTORICO DE LA OBRA:
+(+) ASIGNACIONES : $            0
+(+) REEMBOLSOS   : $            0
+(-) GASTOS TOTAL : $            0
+(=) SALDO ACTUAL : $            0

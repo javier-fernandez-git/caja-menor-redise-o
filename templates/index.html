@@ -1,0 +1,1586 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caja Menor — Guía de Uso</title>
+  <style>
+    :root {
+      --primary:       #1d4ed8;
+      --primary-dark:  #1e3a8a;
+      --primary-light: #dbeafe;
+      --bg:            #f1f5f9;
+      --card:          #ffffff;
+      --text:          #0f172a;
+      --muted:         #64748b;
+      --border:        #e2e8f0;
+      --success:       #15803d;
+      --success-bg:    #dcfce7;
+      --warn:          #b45309;
+      --warn-bg:       #fef3c7;
+      --term-bg:       #0f172a;
+      --term-text:     #e2e8f0;
+      --term-green:    #4ade80;
+      --term-yellow:   #fbbf24;
+      --term-blue:     #93c5fd;
+      --term-input:    #34d399;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+      color: #fff;
+      padding: 2rem 2rem 1.5rem;
+    }
+    header h1 { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.02em; }
+    header p  { margin-top: .3rem; opacity: .8; font-size: .95rem; }
+
+    .start-cmd {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      margin-top: 1rem;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 8px;
+      padding: .45rem 1rem;
+      font-family: 'Courier New', monospace;
+      font-size: .9rem;
+      color: var(--term-green);
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .start-cmd:hover { background: rgba(255,255,255,.2); }
+    .start-cmd .copy-icon { opacity: .7; font-size: .85rem; }
+
+    /* ── LAYOUT ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 0;
+      min-height: calc(100vh - 120px);
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      padding: 1.25rem .75rem;
+      position: sticky;
+      top: 0;
+      height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+    .sidebar-label {
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      padding: 0 .5rem .5rem;
+      margin-top: .75rem;
+    }
+    .sidebar-label:first-child { margin-top: 0; }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      width: 100%;
+      text-align: left;
+      padding: .6rem .75rem;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text);
+      font-size: .9rem;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      margin-bottom: 2px;
+    }
+    .nav-btn .num {
+      min-width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--muted);
+      font-size: .75rem;
+      font-weight: 700;
+      display: grid;
+      place-items: center;
+      transition: background .15s, color .15s;
+    }
+    .nav-btn:hover  { background: var(--bg); }
+    .nav-btn.active { background: var(--primary-light); color: var(--primary-dark); font-weight: 600; }
+    .nav-btn.active .num { background: var(--primary); color: #fff; }
+
+    /* ── MAIN CONTENT ── */
+    main {
+      padding: 1.75rem 2rem;
+      max-width: 900px;
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: .75rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    /* ── STEPS ── */
+    .steps { counter-reset: step; list-style: none; }
+    .steps li {
+      counter-increment: step;
+      display: flex;
+      gap: 1rem;
+      padding: .65rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .steps li:last-child { border-bottom: none; }
+    .steps li::before {
+      content: counter(step);
+      min-width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-size: .8rem;
+      font-weight: 700;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* ── FORM ── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .9rem;
+    }
+    .field { display: flex; flex-direction: column; gap: .3rem; }
+    .field.full { grid-column: 1 / -1; }
+    label { font-size: .82rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    select, input[type="date"], input[type="number"], input[type="text"] {
+      padding: .55rem .75rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: .92rem;
+      color: var(--text);
+      background: var(--bg);
+      transition: border-color .2s;
+      width: 100%;
+    }
+    select:focus, input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: #fff;
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .6rem 1.25rem;
+      border: none;
+      border-radius: 8px;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+    }
+    .btn:hover   { opacity: .88; }
+    .btn:active  { transform: scale(.97); }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-ghost   { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); }
+    .btn-success { background: var(--success); color: #fff; }
+
+    .btn-row { display: flex; gap: .75rem; margin-top: 1rem; flex-wrap: wrap; }
+
+    /* ── TERMINAL ── */
+    .terminal {
+      background: var(--term-bg);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: .5rem;
+      font-family: 'Courier New', Consolas, monospace;
+    }
+    .term-bar {
+      background: #1e293b;
+      padding: .55rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .term-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .term-dot.r { background: #ef4444; }
+    .term-dot.y { background: #f59e0b; }
+    .term-dot.g { background: #22c55e; }
+    .term-title { color: #64748b; font-size: .78rem; margin-left: .5rem; }
+    .term-body {
+      padding: 1rem 1.25rem 1.25rem;
+      font-size: .84rem;
+      line-height: 1.75;
+      color: var(--term-text);
+      white-space: pre-wrap;
+      min-height: 80px;
+    }
+    .term-body .prompt  { color: var(--term-blue); }
+    .term-body .resp    { color: var(--term-input); font-weight: 700; }
+    .term-body .comment { color: var(--muted); }
+    .term-body .header  { color: var(--term-yellow); font-weight: 700; }
+    .term-body .ok      { color: var(--term-green); }
+
+    /* ── TABLE ── */
+    .ref-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    .ref-table th {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      text-align: left;
+      padding: .55rem .75rem;
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .ref-table td { padding: .5rem .75rem; border-bottom: 1px solid var(--border); }
+    .ref-table tr:last-child td { border-bottom: none; }
+    .ref-table tr:hover td { background: var(--bg); }
+    .badge {
+      display: inline-block;
+      padding: .15rem .55rem;
+      border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 600;
+    }
+    .badge-blue   { background: var(--primary-light); color: var(--primary-dark); }
+    .badge-green  { background: var(--success-bg);    color: var(--success); }
+    .badge-yellow { background: var(--warn-bg);        color: var(--warn); }
+
+    /* ── ALERT ── */
+    .alert {
+      border-radius: 8px;
+      padding: .75rem 1rem;
+      font-size: .88rem;
+      margin-bottom: 1rem;
+      display: flex;
+      gap: .6rem;
+    }
+    .alert-info   { background: var(--primary-light); color: var(--primary-dark); border-left: 3px solid var(--primary); }
+    .alert-warn   { background: var(--warn-bg); color: var(--warn); border-left: 3px solid #f59e0b; }
+    .alert-success { background: var(--success-bg); color: var(--success); border-left: 3px solid #22c55e; }
+
+    /* ── CODE INLINE ── */
+    code {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: .1rem .4rem;
+      font-family: 'Courier New', monospace;
+      font-size: .85em;
+      color: var(--primary-dark);
+    }
+
+    /* ── PAGE TITLE ── */
+    .page-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: .35rem;
+    }
+    .page-sub {
+      color: var(--muted);
+      font-size: .92rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── COPY TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #1e293b;
+      color: #fff;
+      padding: .65rem 1.2rem;
+      border-radius: 8px;
+      font-size: .88rem;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: transform .3s, opacity .3s;
+      z-index: 100;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 700px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: .25rem; padding: .75rem; }
+      .sidebar-label { display: none; }
+      .form-grid { grid-template-columns: 1fr; }
+      main { padding: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>&#128230; Sistema de Caja Menor</h1>
+  <p>Guía interactiva de uso y generador de secuencias de comandos</p>
+  <button class="start-cmd" onclick="copyText('python src/app.py', this)">
+    $ python src/app.py
+    <span class="copy-icon">&#128203;</span>
+  </button>
+</header>
+
+<div class="layout">
+
+  <!-- ── SIDEBAR ── -->
+  <nav class="sidebar">
+    <div class="sidebar-label">Inicio</div>
+    <button class="nav-btn active" onclick="showPanel('inicio', this)">
+      <span class="num">&#8594;</span> Inicio rápido
+    </button>
+    <button class="nav-btn" onclick="showPanel('referencia', this)">
+      <span class="num">&#9776;</span> Referencia
+    </button>
+
+    <div class="sidebar-label">Operaciones</div>
+    <button class="nav-btn" onclick="showPanel('op1', this)">
+      <span class="num">1</span> Registrar movimiento
+    </button>
+    <button class="nav-btn" onclick="showPanel('op2', this)">
+      <span class="num">2</span> Ver movimientos
+    </button>
+    <button class="nav-btn" onclick="showPanel('op3', this)">
+      <span class="num">3</span> Ver resumen
+    </button>
+    <button class="nav-btn" onclick="showPanel('op4', this)">
+      <span class="num">4</span> Generar liquidación
+    </button>
+    <button class="nav-btn" onclick="showPanel('op5', this)">
+      <span class="num">5</span> Catálogos
+    </button>
+  </nav>
+
+  <!-- ── MAIN ── -->
+  <main>
+
+    <!-- ══════════════════════════════════════════
+         PANEL: INICIO RÁPIDO
+    ══════════════════════════════════════════ -->
+    <div id="panel-inicio" class="panel active">
+      <div class="page-title">Inicio rápido</div>
+      <div class="page-sub">Cómo instalar y ejecutar la aplicación desde cero.</div>
+
+      <div class="alert alert-info">
+        &#8505;&#65039; No se requieren librerías externas. Solo Python 3.10 o superior.
+      </div>
+
+      <div class="card">
+        <div class="card-title">&#128190; Preparación (primera vez)</div>
+        <ol class="steps">
+          <li>
+            <div>
+              <strong>Abra una terminal</strong> en la carpeta raíz del proyecto.<br>
+              <span style="color:var(--muted);font-size:.88rem;">La carpeta debe contener las subcarpetas <code>src/</code> y <code>data/</code>.</span>
+            </div>
+          </li>
+          <li>
+            <div>
+              <strong>Migre los datos históricos</strong> — solo la primera vez:
+              <div class="terminal" style="margin-top:.5rem;">
+                <div class="term-bar">
+                  <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+                  <span class="term-title">Terminal</span>
+                </div>
+                <div class="term-body"><span class="prompt">$</span> <span class="ok">python src/migrate.py</span></div>
+              </div>
+              <div class="alert alert-success" style="margin-top:.5rem;margin-bottom:0;">
+                &#10003; Si ya existe <code>data/caja_menor.db</code>, puede omitir este paso. Ejecutarlo de nuevo es seguro (no duplica datos).
+              </div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <strong>Ejecute la aplicación:</strong>
+              <div class="terminal" style="margin-top:.5rem;">
+                <div class="term-bar">
+                  <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+                  <span class="term-title">Terminal</span>
+                </div>
+                <div class="term-body"><span class="prompt">$</span> <span class="ok">python src/app.py</span></div>
+              </div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <strong>Verá el menú principal:</strong>
+              <div class="terminal" style="margin-top:.5rem;">
+                <div class="term-bar">
+                  <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+                  <span class="term-title">Caja Menor</span>
+                </div>
+                <div class="term-body"><span class="header">==========================================
+       SISTEMA DE CAJA MENOR
+       Consecutivo actual: #1212
+==========================================</span>
+  <span class="prompt">1.</span> Registrar movimiento
+  <span class="prompt">2.</span> Ver movimientos
+  <span class="prompt">3.</span> Ver resumen por item
+  <span class="prompt">4.</span> Generar liquidacion
+  <span class="prompt">5.</span> Administrar catalogos
+  <span class="prompt">0.</span> Salir
+  Opcion: <span class="resp">_</span></div>
+              </div>
+            </div>
+          </li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <div class="card-title">&#128161; Consejos</div>
+        <ul style="padding-left:1.2rem;line-height:2;">
+          <li>En cualquier punto del menú puede escribir <code>X</code> + Enter para cancelar y volver al inicio.</li>
+          <li>Las fechas siempre se ingresan en formato <code>AAAA-MM-DD</code> (ejemplo: <code>2026-04-11</code>).</li>
+          <li>Para las fechas, presionar <strong>Enter</strong> sin escribir nada usa la fecha de hoy.</li>
+          <li>Los montos se ingresan en pesos sin puntos ni comas (ejemplo: <code>350000</code>).</li>
+          <li>La base de datos se guarda automáticamente en <code>data/caja_menor.db</code>.</li>
+        </ul>
+      </div>
+    </div>
+
+
+<!-- ══════════════════════════════════════════
+     PANEL: OPCIÓN 1 — REGISTRAR MOVIMIENTO
+══════════════════════════════════════════ -->
+<div id="panel-op1" class="panel">
+  <div class="page-title">1. Registrar movimiento</div>
+
+  <div class="page-sub">
+    Ingresa un nuevo movimiento: asignación, gasto, reembolso o ajuste.
+  </div>
+
+  <div class="card">
+    <div class="card-title">&#128295; Generador de secuencia</div>
+
+    <p style="color:var(--muted);font-size:.88rem;margin-bottom:1rem;">
+      Seleccione los valores y haga clic en <strong>Generar</strong>.
+      La herramienta le muestra exactamente qué escribir en cada paso de la terminal.
+    </p>
+
+    <div class="field">
+      <label>Responsable</label>
+
+      <select id="r1-resp">
+        <option value="">Seleccione...</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Tipo de movimiento</label>
+
+      <select id="r1-tipo">
+        <option value="">— Seleccione —</option>
+        <option value="1">1. AJUSTE</option>
+        <option value="2">2. ASIGNACION</option>
+        <option value="3">3. GASTO</option>
+        <option value="4">4. REEMBOLSO</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+          <div class="field">
+            <label>Centro de costos</label>
+            <select id="r1-cc">
+              <option value="">— Seleccione —</option>
+              <option value="1">1. INTERNAS</option>
+              <option value="2">2. OBRA CIVIL</option>
+              <option value="3">3. MANTENIMIENTO</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Item / concepto de gasto</label>
+            <select id="r1-item">
+              <option value="">Cargando items...</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Monto ($)</label>
+            <input type="number" id="r1-monto" placeholder="Ej: 350000" min="1">
+          </div>
+
+          <div class="field">
+            <label>Observación</label>
+            <input type="text" id="r1-observacion" placeholder="Detalle breve">
+          </div>
+
+          <div class="field">
+            <label>Soporte</label>
+            <input type="text" id="r1-soporte" placeholder="Factura, recibo, foto...">
+          </div>
+
+          <div class="field">
+            <label>Fecha del movimiento</label>
+            <input type="date" id="r1-fecha">
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="genOp1()">&#9654; Generar secuencia</button>
+          <button class="btn btn-ghost" onclick="clearOp1()">Limpiar</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">&#128196; Secuencia generada</div>
+        <div class="terminal">
+          <div class="term-bar">
+            <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+            <span class="term-title">Qué escribir en la terminal — Opción 1</span>
+          </div>
+          <div class="term-body" id="out-op1">
+<span class="comment">  Complete el formulario y haga clic en "Generar secuencia"...</span>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="btn-copy-op1" onclick="copyOutput('out-op1')" style="display:none;">
+            &#128203; Copiar
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">&#8505;&#65039; Guía de tipos de movimiento</div>
+        <table class="ref-table">
+          <thead><tr><th>Tipo</th><th>Cuándo usarlo</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge badge-green">ASIGNACION</span></td><td>Se le entrega dinero al trabajador para gastos de la obra.</td></tr>
+            <tr><td><span class="badge badge-blue">REEMBOLSO</span></td><td>Se le devuelve dinero por gastos comprobados con soporte.</td></tr>
+            <tr><td><span class="badge badge-yellow">GASTO</span></td><td>El trabajador reporta un gasto realizado con el dinero asignado.</td></tr>
+            <tr><td><span class="badge badge-yellow">AJUSTE</span></td><td>Corrección contable de un monto registrado previamente.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════
+         PANEL: OPCIÓN 2 — VER MOVIMIENTOS
+    ══════════════════════════════════════════ -->
+    <div id="panel-op2" class="panel">
+      <div class="page-title">2. Ver movimientos</div>
+      <div class="page-sub">Consulta el historial completo de movimientos con filtro por responsable.</div>
+
+      <div class="card">
+        <div class="card-title">&#128295; Generador de secuencia</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Filtrar por responsable</label>
+            <select id="r2-resp">
+              <option value="0">Sin filtro — ver todos</option>
+              <option value="1">1. ALFREDO SAADE</option>
+              <option value="2">2. AMIN GAMARRA</option>
+              <option value="3">3. CIBETH PERTUZ</option>
+              <option value="4">4. EDER AVILA</option>
+              <option value="5">5. HECTOR TOVAR</option>
+              <option value="6">6. JHORMAN GONZALES</option>
+              <option value="7">7. JORGE NUÑEZ</option>
+              <option value="8">8. RAFAEL NIEBLES</option>
+              <option value="9">9. THOMAS MANJARREZ</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Fecha inicio</label>
+            <input type="date" id="r2-fini">
+          </div>
+          <div class="field">
+            <label>Fecha fin</label>
+            <input type="date" id="r2-ffin">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="genOp2()">&#9654; Generar secuencia</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">&#128196; Secuencia generada</div>
+        <div class="terminal">
+          <div class="term-bar">
+            <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+            <span class="term-title">Qué escribir en la terminal — Opción 2</span>
+          </div>
+          <div class="term-body" id="out-op2">
+<span class="comment">  Seleccione un filtro y haga clic en "Generar secuencia"...</span>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="btn-copy-op2" onclick="copyOutput('out-op2')" style="display:none;">
+            &#128203; Copiar
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">&#128065; Ejemplo de salida</div>
+        <div class="terminal">
+          <div class="term-bar">
+            <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+          </div>
+          <div class="term-body"><span class="header">--------------------------------------------------------------
+RECIBO F.INI       F.FIN       RESPONSABLE        TIPO        ITEM                   MONTO
+--------------------------------------------------------------</span>
+<span class="prompt">1121</span>   2026-02-25  2026-02-26  AMIN GAMARRA       REEMBOLSO   MATERIALES          <span class="ok">$ 50,000</span>
+<span class="prompt">1123</span>   2026-02-26  2026-02-27  AMIN GAMARRA       REEMBOLSO   GASTOS MENORES     <span class="ok">$ 500,000</span>
+<span class="prompt">1126</span>   2026-03-10  2026-03-15  AMIN GAMARRA       ASIGNACION  ALIMENTACION        <span class="ok">$ 50,000</span>
+<span class="comment">  ... (más filas) ...</span>
+<span class="header">--------------------------------------------------------------</span>
+                                                     TOTAL   <span class="ok">$ 58,603,043</span></div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════
+         PANEL: OPCIÓN 3 — VER RESUMEN
+    ══════════════════════════════════════════ -->
+    <div id="panel-op3" class="panel">
+      <div class="page-title">3. Ver resumen por ítem</div>
+      <div class="page-sub">Muestra el total acumulado agrupado por categoría de gasto.</div>
+
+      <div class="card">
+        <div class="card-title">&#128295; Generador de secuencia</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Filtrar por responsable</label>
+            <select id="r3-resp">
+              <option value="0">Sin filtro — ver todos</option>
+              <option value="1">1. ALFREDO SAADE</option>
+              <option value="2">2. AMIN GAMARRA</option>
+              <option value="3">3. CIBETH PERTUZ</option>
+              <option value="4">4. EDER AVILA</option>
+              <option value="5">5. HECTOR TOVAR</option>
+              <option value="6">6. JHORMAN GONZALES</option>
+              <option value="7">7. JORGE NUÑEZ</option>
+              <option value="8">8. RAFAEL NIEBLES</option>
+              <option value="9">9. THOMAS MANJARREZ</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Filtrar por tipo</label>
+            <select id="r3-tipo">
+              <option value="0">Sin filtro — todos los tipos</option>
+              <option value="1">1. AJUSTE</option>
+              <option value="2">2. ASIGNACION</option>
+              <option value="3">3. GASTO</option>
+              <option value="4">4. REEMBOLSO</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Fecha inicio</label>
+            <input type="date" id="r3-fini">
+          </div>
+          <div class="field">
+            <label>Fecha fin</label>
+            <input type="date" id="r3-ffin">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="genOp3()">&#9654; Generar secuencia</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">&#128196; Secuencia generada</div>
+        <div class="terminal">
+          <div class="term-bar">
+            <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+            <span class="term-title">Qué escribir en la terminal — Opción 3</span>
+          </div>
+          <div class="term-body" id="out-op3">
+<span class="comment">  Configure los filtros y haga clic en "Generar secuencia"...</span>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="btn-copy-op3" onclick="copyOutput('out-op3')" style="display:none;">
+            &#128203; Copiar
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">&#128065; Ejemplo de salida</div>
+        <div class="terminal">
+          <div class="term-bar">
+            <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+          </div>
+          <div class="term-body"><span class="header">--------------------------------------------------------------
+  ITEM                           TOTAL
+--------------------------------------------------------------</span>
+  AGUA Y HIELO                        <span class="ok">$    212,700</span>
+  ALIMENTACION                        <span class="ok">$ 17,847,010</span>
+  CAJA MENOR                          <span class="ok">$ 45,914,000</span>
+  GASTOS MENORES                      <span class="ok">$  7,612,000</span>
+  MATERIALES                          <span class="ok">$ 28,427,000</span>
+  PEAJES ARACATACA                    <span class="ok">$     74,700</span>
+  <span class="comment">  ... (más ítems) ...</span>
+<span class="header">--------------------------------------------------------------
+  TOTAL GENERAL                       $ 101,033,114</span></div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════
+         PANEL: OPCIÓN 4 — LIQUIDACIÓN
+    ══════════════════════════════════════════ -->
+    <div id="panel-op4" class="panel">
+      <div class="page-title">4. Generar liquidación</div>
+      <div class="page-sub">Genera el recibo de liquidación de caja menor para un período.</div>
+
+      <div class="card">
+        <div class="card-title">&#128295; Generador de secuencia</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Responsable</label>
+            <select id="r4-resp">
+              <option value="">— Seleccione —</option>
+              <option value="1">1. ALFREDO SAADE</option>
+              <option value="2">2. AMIN GAMARRA</option>
+              <option value="3">3. CIBETH PERTUZ</option>
+              <option value="4">4. EDER AVILA</option>
+              <option value="5">5. HECTOR TOVAR</option>
+              <option value="6">6. JHORMAN GONZALES</option>
+              <option value="7">7. JORGE NUÑEZ</option>
+              <option value="8">8. RAFAEL NIEBLES</option>
+              <option value="9">9. THOMAS MANJARREZ</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Obra</label>
+            <select id="r4-obra">
+              <option value="">— Seleccione —</option>
+              <option value="1">1. ALEJANDRIA OT 388884384</option>
+              <option value="2">2. ALTOS DE 20 DE OCTUBRE OT 386194281</option>
+              <option value="3">3. CORALINA CARIBE OT 375505681</option>
+              <option value="4">4. CORALINA DEL SOL OT 373454376</option>
+              <option value="5">5. FUNDACION OT 2388968797</option>
+              <option value="6">6. GRAN VIA OT 388175823</option>
+              <option value="7">7. GUAMAL OT 385865401</option>
+              <option value="8">8. LABERINTO MACONDO OT 390545173</option>
+              <option value="9">9. LAS ACACIAS OT 385868802</option>
+              <option value="10">10. LIBANO 2000 OT 373460551</option>
+              <option value="11">11. PUEBLO NUEVO OT382095531</option>
+              <option value="12">12. TERRABONGA OT 379328738</option>
+              <option value="13">13. TIERRA LINDA OT 386194691</option>
+              <option value="14">14. VEREDA GUADALUPANA OT 382958018</option>
+              <option value="15">15. VILLA AURORA OT 385865309</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Centro de costos</label>
+            <select id="r4-cc">
+              <option value="">— Seleccione —</option>
+              <option value="1">1. INTERNAS</option>
+              <option value="2">2. OBRA CIVIL</option>
+              <option value="3">3. MANTENIMIENTO</option>
+            </select>
+          </div>
+          <div class="field"><!-- spacer --></div>
+          <div class="field">
+            <label>Fecha inicio del período</label>
+            <input type="date" id="r4-fini">
+          </div>
+          <div class="field">
+            <label>Fecha fin del período</label>
+            <input type="date" id="r4-ffin">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="genOp4()">&#9654; Generar secuencia</button>
+          <button class="btn btn-ghost" onclick="clearOp4()">Limpiar</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">&#128196; Secuencia generada</div>
+        <div class="terminal">
+          <div class="term-bar">
+            <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+            <span class="term-title">Qué escribir en la terminal — Opción 4</span>
+          </div>
+          <div class="term-body" id="out-op4">
+<span class="comment">  Complete el formulario y haga clic en "Generar secuencia"...</span>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="btn-copy-op4" onclick="copyOutput('out-op4')" style="display:none;">
+            &#128203; Copiar
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">&#128065; Ejemplo de recibo generado</div>
+        <div class="terminal">
+          <div class="term-bar">
+            <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+          </div>
+          <div class="term-body"><span class="header">==============================================================
+           RECIBO DE LIQUIDACION -- CAJA MENOR
+==============================================================</span>
+  <span class="prompt">RESPONSABLE   :</span> AMIN GAMARRA
+  <span class="prompt">OBRA          :</span> LIBANO 2000 OT 373460551
+  <span class="prompt">CENTRO COSTOS :</span> OBRA CIVIL
+  <span class="prompt">PERIODO       :</span> 2026-03-01  a  2026-03-31
+<span class="header">--------------------------------------------------------------
+  GASTOS PARA REEMBOLSO (periodo):
+--------------------------------------------------------------</span>
+  AGUA Y HIELO                        <span class="ok">$      28,000</span>
+  ALIMENTACION                        <span class="ok">$     766,000</span>
+  GASTOS MENORES                      <span class="ok">$   5,280,000</span>
+  MATERIALES                          <span class="ok">$  13,827,000</span>
+  PEAJES ARACATACA                    <span class="ok">$      54,100</span>
+<span class="header">--------------------------------------------------------------
+  (=) TOTAL REEMBOLSO                 $  20,066,066
+--------------------------------------------------------------
+  RESUMEN GENERAL:
+--------------------------------------------------------------</span>
+  <span class="prompt">(+) ASIGNACIONES</span>                    <span class="ok">$  36,919,500</span>
+  <span class="prompt">(+) REEMBOLSOS RECIBIDOS</span>            <span class="ok">$  21,641,166</span>
+  <span class="prompt">(=) TOTAL RECIBIDO</span>                  <span class="ok">$  58,560,666</span>
+  <span class="prompt">(-) EJECUTADO</span>                       <span class="ok">$     856,700</span>
+<span class="header">--------------------------------------------------------------
+  (=) NETO                            $  57,703,966
+==============================================================</span></div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════
+         PANEL: OPCIÓN 5 — CATÁLOGOS
+    ══════════════════════════════════════════ -->
+    <div id="panel-op5" class="panel">
+      <div class="page-title">5. Administrar catálogos</div>
+      <div class="page-sub">Agrega nuevos responsables, obras, ítems y unidades constructivas sin editar archivos.</div>
+
+      <div class="card">
+        <div class="card-title">&#128295; Generador de secuencia</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>¿Qué desea agregar?</label>
+            <select id="r5-tipo" onchange="updateOp5()">
+              <option value="1">1. Agregar responsable</option>
+              <option value="2">2. Agregar obra</option>
+              <option value="3">3. Agregar ítem</option>
+              <option value="4">4. Agregar unidad constructiva</option>
+            </select>
+          </div>
+          <div class="field">
+            <label id="r5-label">Nombre del responsable</label>
+            <input type="text" id="r5-nombre" placeholder="Ej: PEDRO GARCIA">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="genOp5()">&#9654; Generar secuencia</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">&#128196; Secuencia generada</div>
+        <div class="terminal">
+          <div class="term-bar">
+            <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+            <span class="term-title">Qué escribir en la terminal — Opción 5</span>
+          </div>
+          <div class="term-body" id="out-op5">
+<span class="comment">  Seleccione el tipo y el nombre, luego haga clic en "Generar secuencia"...</span>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="btn-copy-op5" onclick="copyOutput('out-op5')" style="display:none;">
+            &#128203; Copiar
+          </button>
+        </div>
+      </div>
+
+      <div class="alert alert-warn">
+        &#9888;&#65039; Si el nombre ya existe en la base de datos, el sistema lo omite sin generar error. No hay riesgo de crear duplicados.
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════
+         PANEL: REFERENCIA RÁPIDA
+    ══════════════════════════════════════════ -->
+    <div id="panel-referencia" class="panel">
+      <div class="page-title">Referencia rápida</div>
+      <div class="page-sub">Números exactos para cada selección en la terminal.</div>
+
+      <div class="card">
+        <div class="card-title">&#128100; Responsables</div>
+        <table class="ref-table">
+          <thead><tr><th>#</th><th>Nombre</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>ALFREDO SAADE</td></tr>
+            <tr><td>2</td><td>AMIN GAMARRA</td></tr>
+            <tr><td>3</td><td>CIBETH PERTUZ</td></tr>
+            <tr><td>4</td><td>EDER AVILA</td></tr>
+            <tr><td>5</td><td>HECTOR TOVAR</td></tr>
+            <tr><td>6</td><td>JHORMAN GONZALES</td></tr>
+            <tr><td>7</td><td>JORGE NUÑEZ</td></tr>
+            <tr><td>8</td><td>RAFAEL NIEBLES</td></tr>
+            <tr><td>9</td><td>THOMAS MANJARREZ</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">&#127959; Obras</div>
+        <table class="ref-table">
+          <thead><tr><th>#</th><th>Nombre</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>ALEJANDRIA OT 388884384</td></tr>
+            <tr><td>2</td><td>ALTOS DE 20 DE OCTUBRE OT 386194281</td></tr>
+            <tr><td>3</td><td>CORALINA CARIBE OT 375505681</td></tr>
+            <tr><td>4</td><td>CORALINA DEL SOL OT 373454376</td></tr>
+            <tr><td>5</td><td>FUNDACION OT 2388968797</td></tr>
+            <tr><td>6</td><td>GRAN VIA OT 388175823</td></tr>
+            <tr><td>7</td><td>GUAMAL OT 385865401</td></tr>
+            <tr><td>8</td><td>LABERINTO MACONDO OT 390545173</td></tr>
+            <tr><td>9</td><td>LAS ACACIAS OT 385868802</td></tr>
+            <tr><td>10</td><td>LIBANO 2000 OT 373460551</td></tr>
+            <tr><td>11</td><td>PUEBLO NUEVO OT382095531</td></tr>
+            <tr><td>12</td><td>TERRABONGA OT 379328738</td></tr>
+            <tr><td>13</td><td>TIERRA LINDA OT 386194691</td></tr>
+            <tr><td>14</td><td>VEREDA GUADALUPANA OT 382958018</td></tr>
+            <tr><td>15</td><td>VILLA AURORA OT 385865309</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-title">&#128200; Tipos de movimiento</div>
+          <table class="ref-table">
+            <thead><tr><th>#</th><th>Tipo</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>AJUSTE</td></tr>
+              <tr><td>2</td><td>ASIGNACION</td></tr>
+              <tr><td>3</td><td>GASTO</td></tr>
+              <tr><td>4</td><td>REEMBOLSO</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-title">&#127970; Centro de costos</div>
+          <table class="ref-table">
+            <thead><tr><th>#</th><th>Contrato</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>INTERNAS</td></tr>
+              <tr><td>2</td><td>OBRA CIVIL</td></tr>
+              <tr><td>3</td><td>MANTENIMIENTO</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:1.25rem;">
+        <div class="card-title">&#128230; Ítems de gasto</div>
+        <table class="ref-table">
+          <thead><tr><th>#</th><th>Ítem</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>AGUA PARA PERFILACION</td></tr>
+            <tr><td>2</td><td>AGUA Y HIELO</td></tr>
+            <tr><td>3</td><td>ALIMENTACION</td></tr>
+            <tr><td>4</td><td>ASIGNACION</td></tr>
+            <tr><td>5</td><td>CAJA MENOR</td></tr>
+            <tr><td>6</td><td>GASTOS MENORES</td></tr>
+            <tr><td>7</td><td>MATERIALES</td></tr>
+            <tr><td>8</td><td>PAGO DE ARRIENDO</td></tr>
+            <tr><td>9</td><td>PAGO DE BODEGAJE</td></tr>
+            <tr><td>10</td><td>PAGO DE MANO DE OBRA</td></tr>
+            <tr><td>11</td><td>PEAJES ARACATACA</td></tr>
+            <tr><td>12</td><td>PEAJES COPEY</td></tr>
+            <tr><td>13</td><td>PEAJES DIFICIL</td></tr>
+            <tr><td>14</td><td>PEAJES TUCURINCA</td></tr>
+            <tr><td>15</td><td>PEAJES ZONA TURISTICA</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Toast -->
+<div id="toast">&#10003; Copiado al portapapeles</div>
+
+<script>
+  // ── Tab navigation ────────────────────────────────────────
+  function showPanel(name, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    btn.classList.add('active');
+  }
+
+let OBRAS_MAP = {}; // ← NUEVO
+
+let ITEM_LABELS = {};
+let UNIDADES_LABELS = {};
+let RESP_LABELS = {};
+let TIPO_LABELS = {};
+
+async function cargarResponsables() {
+  const selects = [
+    document.getElementById("r1-resp"),
+    document.getElementById("r2-resp"),
+    document.getElementById("r3-resp"),
+    document.getElementById("r4-resp")
+  ].filter(Boolean);
+
+  if (!selects.length) {
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/responsables");
+    const responsables = await res.json();
+
+    if (!Array.isArray(responsables)) {
+      console.error("No es array:", responsables);
+      return;
+    }
+
+    RESP_LABELS = {};
+    selects.forEach(select => {
+      const allowAll = select.id === "r2-resp" || select.id === "r3-resp";
+      select.innerHTML = allowAll
+        ? '<option value="0">Sin filtro — ver todos</option>'
+        : '<option value="">Seleccione...</option>';
+    });
+
+    responsables.forEach(resp => {
+      RESP_LABELS[resp.id] = resp.nombre;
+      selects.forEach(select => {
+        const option = document.createElement("option");
+        option.value = resp.id;
+        option.textContent = `${resp.id}. ${resp.nombre}`;
+        select.appendChild(option);
+      });
+    });
+  } catch (error) {
+    console.error("Error cargando responsables:", error);
+  }
+}
+
+async function cargarTiposMovimiento() {
+  const selects = [
+    document.getElementById("r1-tipo"),
+    document.getElementById("r3-tipo")
+  ].filter(Boolean);
+
+  if (!selects.length) {
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/tipos");
+    const tipos = await res.json();
+
+    if (!Array.isArray(tipos)) {
+      console.error("No es array:", tipos);
+      return;
+    }
+
+    TIPO_LABELS = {};
+    selects.forEach(select => {
+      const allowAll = select.id === "r3-tipo";
+      select.innerHTML = allowAll
+        ? '<option value="0">Sin filtro — todos los tipos</option>'
+        : '<option value="">Seleccione...</option>';
+    });
+
+    tipos.forEach(tipo => {
+      TIPO_LABELS[tipo.id] = tipo.texto;
+      selects.forEach(select => {
+        const option = document.createElement("option");
+        option.value = tipo.id;
+        option.textContent = `${tipo.id}. ${tipo.texto}`;
+        select.appendChild(option);
+      });
+    });
+  } catch (error) {
+    console.error("Error cargando tipos:", error);
+  }
+}
+
+async function cargarObras() {
+  const selects = [
+    document.getElementById("r4-obra"),
+    document.getElementById("obra")
+  ].filter(Boolean);
+
+  if (!selects.length) {
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/obras");
+    const obras = await res.json();
+
+    if (!Array.isArray(obras)) {
+      console.error("No es array:", obras);
+      return;
+    }
+
+    selects.forEach(select => {
+      select.innerHTML = '<option value="">Seleccione...</option>';
+    });
+
+    OBRAS_MAP = {};
+    obras.forEach(o => {
+      OBRAS_MAP[o.id] = o.nombre;
+      selects.forEach(select => {
+        const option = document.createElement("option");
+        option.value = o.id;
+        option.textContent = `${o.id}. ${o.nombre}`;
+        select.appendChild(option);
+      });
+    });
+
+  } catch (error) {
+    console.error("Error cargando obras:", error);
+    selects.forEach(select => {
+      select.innerHTML = '<option value="">No se pudieron cargar las obras</option>';
+    });
+  }
+}
+// ejecutar al cargar la página
+async function cargarItems() {
+  const selects = [
+    document.getElementById("r1-item"),
+    document.getElementById("item")
+  ].filter(Boolean);
+
+  if (!selects.length) {
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/items");
+    const items = await res.json();
+
+    if (!Array.isArray(items)) {
+      console.error("No es array:", items);
+      return;
+    }
+
+    selects.forEach(select => {
+      select.innerHTML = '<option value="">Seleccione...</option>';
+    });
+
+    ITEM_LABELS = {};
+    items.forEach(item => {
+      ITEM_LABELS[item.id] = item.nombre;
+      selects.forEach(select => {
+        const option = document.createElement("option");
+        option.value = item.id;
+        option.textContent = `${item.id}. ${item.nombre}`;
+        select.appendChild(option);
+      });
+    });
+  } catch (error) {
+    console.error("Error cargando items:", error);
+    selects.forEach(select => {
+      select.innerHTML = '<option value="">No se pudieron cargar los items</option>';
+    });
+  }
+}
+
+async function cargarUnidadesConstructivas() {
+  const selects = [
+    document.getElementById("r1-unidad")
+  ].filter(Boolean);
+
+  if (!selects.length) {
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/unidades-constructivas");
+    const unidades = await res.json();
+
+    if (!Array.isArray(unidades)) {
+      console.error("No es array:", unidades);
+      return;
+    }
+
+    selects.forEach(select => {
+      select.innerHTML = '<option value="">Seleccione...</option>';
+    });
+
+    UNIDADES_LABELS = {};
+    unidades.forEach(unidad => {
+      UNIDADES_LABELS[unidad.id] = unidad.nombre;
+      selects.forEach(select => {
+        const option = document.createElement("option");
+        option.value = unidad.id;
+        option.textContent = `${unidad.id}. ${unidad.nombre}`;
+        select.appendChild(option);
+      });
+    });
+  } catch (error) {
+    console.error("Error cargando unidades constructivas:", error);
+    selects.forEach(select => {
+      select.innerHTML = '<option value="">No se pudieron cargar las unidades</option>';
+    });
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  cargarResponsables();
+  cargarTiposMovimiento();
+  cargarObras();
+  cargarItems();
+  cargarUnidadesConstructivas();
+});
+
+  // ── Toast ─────────────────────────────────────────────────
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg || '✓ Copiado';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  function copyText(text, el) {
+    navigator.clipboard.writeText(text).then(() => showToast('✓ Comando copiado'));
+  }
+
+  function copyOutput(id) {
+    const el = document.getElementById(id);
+    const text = el.innerText || el.textContent;
+    navigator.clipboard.writeText(text).then(() => showToast('✓ Secuencia copiada'));
+  }
+
+  // ── Data maps for label resolution ───────────────────────
+  const CC_LABELS = {'1':'INTERNAS','2':'OBRA CIVIL','3':'MANTENIMIENTO'};
+
+  function fmt(num) {
+    return Number(num).toLocaleString('es-CO');
+  }
+
+  // ── HTML rendering helpers ────────────────────────────────
+  function renderTerminal(lines) {
+    return lines.map(l => {
+      if (l.type === 'header')  return `<span class="header">${esc(l.text)}</span>`;
+      if (l.type === 'prompt')  return `<span class="prompt">${esc(l.text)}</span>`;
+      if (l.type === 'resp')    return `<span class="resp">${esc(l.text)}</span>`;
+      if (l.type === 'comment') return `<span class="comment">${esc(l.text)}</span>`;
+      if (l.type === 'ok')      return `<span class="ok">${esc(l.text)}</span>`;
+      if (l.type === 'mixed') {
+        return l.parts.map(p => {
+          if (p.cls) return `<span class="${p.cls}">${esc(p.text)}</span>`;
+          return esc(p.text);
+        }).join('');
+      }
+      return esc(l.text || '');
+    }).join('\n');
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function row(prompt, resp, label) {
+    return {
+      type: 'mixed',
+      parts: [
+        { text: '  ' + prompt + ' ', cls: 'prompt' },
+        { text: resp, cls: 'resp' },
+        label ? { text: '   ← ' + label, cls: 'comment' } : { text: '' }
+      ]
+    };
+  }
+
+  function sep(char, n) { return { text: (char || '-').repeat(n || 50) }; }
+  function blank()      { return { text: '' }; }
+  function hdr(t)       { return { type: 'header', text: t }; }
+  function cmt(t)       { return { type: 'comment', text: t }; }
+  function ok(t)        { return { type: 'ok', text: t }; }
+
+  // ── OP 1 ─────────────────────────────────────────────────
+  function genOp1() {
+    const resp  = document.getElementById('r1-resp').value;
+    const tipo  = document.getElementById('r1-tipo').value;
+    const cc    = document.getElementById('r1-cc').value;
+    const unidad = document.getElementById('r1-unidad').value;
+    const item  = document.getElementById('r1-item').value;
+    const monto = document.getElementById('r1-monto').value;
+    const observacion = document.getElementById('r1-observacion').value.trim();
+    const soporte = document.getElementById('r1-soporte').value.trim();
+    const fecha = document.getElementById('r1-fecha').value;
+
+    if (!resp || !tipo || !cc || !unidad || !item) {
+      document.getElementById('out-op1').innerHTML =
+        '<span class="comment">  ⚠  Complete responsable, tipo, centro de costos, unidad constructiva e item.</span>';
+      return;
+    }
+
+    const today = new Date().toISOString().slice(0,10);
+    const fm = fecha || today;
+
+    const lines = [
+      hdr('== Menú principal =='),
+      row('Opcion:', '1', 'Registrar movimiento'),
+      blank(),
+      hdr('== RESPONSABLE =='),
+      row('Opcion (0-9):', resp, RESP_LABELS[resp]),
+      blank(),
+      hdr('== TIPO DE MOVIMIENTO =='),
+      row('Opcion (0-4):', tipo, TIPO_LABELS[tipo]),
+      blank(),
+      hdr('== CENTRO DE COSTOS =='),
+      row('Opcion (0-3):', cc, CC_LABELS[cc]),
+      blank(),
+      hdr('== UNIDAD CONSTRUCTIVA =='),
+      row('Opcion:', unidad, UNIDADES_LABELS[unidad] || 'Unidad no encontrada'),
+      blank(),
+      hdr('== ITEM / CONCEPTO DE GASTO =='),
+      row('Opcion:', item, ITEM_LABELS[item] || 'Item no encontrado'),
+      blank(),
+      hdr('== MONTO =='),
+      row('Monto ($):', monto ? monto : '?', monto ? '$ ' + fmt(monto) : 'Pendiente'),
+      blank(),
+      hdr('== OBSERVACION =='),
+      row('Observacion:', observacion || '-', ''),
+      blank(),
+      hdr('== SOPORTE =='),
+      row('Soporte:', soporte || '-', ''),
+      blank(),
+      hdr('== FECHA DEL MOVIMIENTO =='),
+      row('Fecha [' + today + ']:', fm, ''),
+      blank(),
+      ok('  >> Recibo registrado exitosamente.'),
+    ];
+
+    document.getElementById('out-op1').innerHTML = renderTerminal(lines);
+    document.getElementById('btn-copy-op1').style.display = 'inline-flex';
+  }
+
+  function clearOp1() {
+    ['r1-resp','r1-tipo','r1-cc','r1-unidad','r1-item'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('r1-monto').value = '';
+    document.getElementById('r1-observacion').value = '';
+    document.getElementById('r1-soporte').value = '';
+    document.getElementById('r1-fecha').value = '';
+    document.getElementById('out-op1').innerHTML =
+      '<span class="comment">  Complete el formulario y haga clic en "Generar secuencia"...</span>';
+    document.getElementById('btn-copy-op1').style.display = 'none';
+  }
+
+  // ── OP 2 ─────────────────────────────────────────────────
+  function genOp2() {
+    const resp = document.getElementById('r2-resp').value;
+    const fini = document.getElementById('r2-fini').value;
+    const ffin = document.getElementById('r2-ffin').value;
+    const noFilter = resp === '0';
+
+    const lines = [
+      hdr('== Menú principal =='),
+      row('Opcion:', '2', 'Ver movimientos'),
+      blank(),
+      hdr('== Filtrar por responsable =='),
+    ];
+
+    if (noFilter) {
+      lines.push(row('Opcion:', '', ''));
+      lines.push(cmt('  (presione Enter sin escribir nada → muestra todos)'));
+    } else {
+      lines.push(row('Opcion:', resp, RESP_LABELS[resp]));
+    }
+
+    lines.push(blank());
+    lines.push(hdr('== RANGO DE FECHAS =='));
+    lines.push(row('Fecha inicio:', fini || '', fini ? '' : 'Enter = sin filtro'));
+    lines.push(row('Fecha fin:', ffin || '', ffin ? '' : 'Enter = sin filtro'));
+    lines.push(blank());
+    lines.push(ok('  >> Se mostrará la tabla de movimientos.'));
+
+    document.getElementById('out-op2').innerHTML = renderTerminal(lines);
+    document.getElementById('btn-copy-op2').style.display = 'inline-flex';
+  }
+
+  // ── OP 3 ─────────────────────────────────────────────────
+  function genOp3() {
+    const resp = document.getElementById('r3-resp').value;
+    const tipo = document.getElementById('r3-tipo').value;
+    const fini = document.getElementById('r3-fini').value;
+    const ffin = document.getElementById('r3-ffin').value;
+    const noR  = resp === '0';
+    const noT  = tipo === '0';
+
+    const lines = [
+      hdr('== Menú principal =='),
+      row('Opcion:', '3', 'Ver resumen por ítem'),
+      blank(),
+      hdr('== Filtrar por responsable =='),
+    ];
+
+    if (noR) {
+      lines.push(row('Opcion:', '', ''));
+      lines.push(cmt('  (Enter → todos los responsables)'));
+    } else {
+      lines.push(row('Opcion:', resp, RESP_LABELS[resp]));
+    }
+
+    lines.push(blank());
+    lines.push(hdr('== Filtrar por tipo =='));
+
+    if (noT) {
+      lines.push(row('Opcion:', '', ''));
+      lines.push(cmt('  (Enter → todos los tipos)'));
+    } else {
+      lines.push(row('Opcion:', tipo, TIPO_LABELS[tipo]));
+    }
+
+    lines.push(blank());
+    lines.push(hdr('== RANGO DE FECHAS =='));
+    lines.push(row('Fecha inicio:', fini || '', fini ? '' : 'Enter = sin filtro'));
+    lines.push(row('Fecha fin:', ffin || '', ffin ? '' : 'Enter = sin filtro'));
+    lines.push(blank());
+    lines.push(ok('  >> Se mostrará el resumen agrupado por ítem.'));
+
+    document.getElementById('out-op3').innerHTML = renderTerminal(lines);
+    document.getElementById('btn-copy-op3').style.display = 'inline-flex';
+  }
+
+  // ── OP 4 ─────────────────────────────────────────────────
+  function genOp4() {
+    const resp = document.getElementById('r4-resp').value;
+    const obra = document.getElementById('r4-obra').value;
+    const cc   = document.getElementById('r4-cc').value;
+    const fini = document.getElementById('r4-fini').value;
+    const ffin = document.getElementById('r4-ffin').value;
+
+    if (!resp || !obra || !cc || !fini || !ffin) {
+      document.getElementById('out-op4').innerHTML =
+        '<span class="comment">  ⚠  Complete todos los campos (responsable, obra, CC y ambas fechas).</span>';
+      return;
+    }
+
+    const lines = [
+      hdr('== Menú principal =='),
+      row('Opcion:', '4', 'Generar liquidación'),
+      blank(),
+      hdr('== RESPONSABLE =='),
+      row('Opcion (0-9):', resp, RESP_LABELS[resp]),
+      blank(),
+      hdr('== OBRA =='),
+      row('Opcion:', obra, OBRAS_MAP[obra] || 'Obra no encontrada'),
+      blank(),
+      hdr('== CENTRO DE COSTOS =='),
+      row('Opcion (0-3):', cc, CC_LABELS[cc]),
+      blank(),
+      hdr('== PERIODO =='),
+      row('Fecha inicio:', fini, ''),
+      row('Fecha fin:   ', ffin, ''),
+      blank(),
+      ok('  >> Se imprimirá el recibo de liquidación.'),
+    ];
+
+    document.getElementById('out-op4').innerHTML = renderTerminal(lines);
+    document.getElementById('btn-copy-op4').style.display = 'inline-flex';
+  }
+
+  function clearOp4() {
+    ['r4-resp','r4-obra','r4-cc'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('r4-fini').value = '';
+    document.getElementById('r4-ffin').value = '';
+    document.getElementById('out-op4').innerHTML =
+      '<span class="comment">  Complete el formulario y haga clic en "Generar secuencia"...</span>';
+    document.getElementById('btn-copy-op4').style.display = 'none';
+  }
+
+  // ── OP 5 ─────────────────────────────────────────────────
+  const OP5_LABELS = {
+    '1': 'Nombre del responsable',
+    '2': 'Nombre de la obra',
+    '3': 'Nombre del ítem',
+    '4': 'Nombre de la unidad constructiva'
+  };
+
+  function updateOp5() {
+    const tipo = document.getElementById('r5-tipo').value;
+    document.getElementById('r5-label').textContent = OP5_LABELS[tipo];
+  }
+
+  function genOp5() {
+    const tipo   = document.getElementById('r5-tipo').value;
+    const nombre = document.getElementById('r5-nombre').value.trim().toUpperCase();
+
+    if (!nombre) {
+      document.getElementById('out-op5').innerHTML =
+        '<span class="comment">  ⚠  Ingrese el nombre antes de generar la secuencia.</span>';
+      return;
+    }
+
+    const lines = [
+      hdr('== Menú principal =='),
+      row('Opcion:', '5', 'Administrar catálogos'),
+      blank(),
+      hdr('== ADMINISTRAR CATALOGOS =='),
+      row('Opcion:', tipo, OP5_LABELS[tipo]),
+      blank(),
+      row(OP5_LABELS[tipo] + ':', nombre, ''),
+      blank(),
+      ok('  >> Registro agregado exitosamente.'),
+    ];
+
+    document.getElementById('out-op5').innerHTML = renderTerminal(lines);
+    document.getElementById('btn-copy-op5').style.display = 'inline-flex';
+  }
+
+  // ── Set default dates ─────────────────────────────────────
+  (function() {
+    const today = new Date().toISOString().slice(0, 10);
+    ['r1-fecha','r2-fini','r2-ffin','r3-fini','r3-ffin','r4-fini','r4-ffin'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = today;
+    });
+  })();
+</script>
+</body>
+</html>

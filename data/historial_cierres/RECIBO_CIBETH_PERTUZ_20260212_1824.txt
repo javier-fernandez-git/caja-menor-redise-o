@@ -1,0 +1,19 @@
+
+--- RECIBO DE LIQUIDACION ---
+RESPONSABLE: CIBETH PERTUZ
+PERIODO: 2026-01-01 a 2026-02-12
+OBRA: LABERINTO MACONDO OT 390545173
+------------------------------
+RESUMEN PARCIAL DE GASTOS:
+------------------------------
+ALIMENTACION              : $      250,001
+CAJA MENOR                : $      500,000
+PEAJES ARACATACA          : $      307,000
+(=) NETO A REEMBOLSAR:      $    1,057,001
+1,057,001 PESOS COP
+------------------------------
+RESUMEN HISTORICO DE LA OBRA:
+(+) ASIGNACIONES : $            0
+(+) REEMBOLSOS   : $            0
+(-) GASTOS TOTAL : $    1,057,001
+(=) SALDO ACTUAL : $   -1,057,001

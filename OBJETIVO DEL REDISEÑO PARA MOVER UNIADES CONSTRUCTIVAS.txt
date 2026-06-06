@@ -1,0 +1,238 @@
+OBJETIVO DEL REDISEÑO
+
+Necesito rediseñar completamente la arquitectura funcional del sistema de Caja Menor para separar el flujo financiero del flujo operativo de unidades constructivas, ya que las unidades constructivas son el resultado final o producto y necesitan de unos gastos para fabricarse, con lo cual es mejor que no estén en el registro de movimientos.
+
+ACTUALMENTE:
+Las unidades constructivas están dentro del módulo:
+
+1. Registrar Movimiento
+
+Esto es incorrecto porque:
+
+* Registrar Movimiento debe manejar únicamente trazabilidad financiera.
+* Las unidades constructivas no son un movimiento contable.
+* Las unidades representan avance físico de obra y deben relacionarse posteriormente con costos y consumos.
+
+NUEVA ARQUITECTURA REQUERIDA
+
+El sistema debe quedar así:
+
+1. REGISTRAR MOVIMIENTO
+2. VER MOVIMIENTOS
+3. VER RESUMEN
+4. GENERAR LIQUIDACION
+
+REGLAS IMPORTANTES
+
+========================================
+
+1. REGISTRAR MOVIMIENTO
+   ========================================
+
+Este módulo debe registrar únicamente:
+
+* Responsable
+* Tipo de movimiento
+* Centro de costos
+* Item / concepto de gasto
+* Monto
+* Observación
+* Soporte
+* Fecha
+
+ELIMINAR COMPLETAMENTE:
+
+* Unidad Constructiva
+* Cantidad de unidades
+
+El flujo debe quedar así:
+
+== Menú principal ==
+Opcion: 1
+
+== RESPONSABLE ==
+Opcion (0-9): 8
+
+== TIPO DE MOVIMIENTO ==
+Opcion (0-4): 1
+
+== CENTRO DE COSTOS ==
+Opcion (0-3): 2
+
+== ITEM / CONCEPTO DE GASTO ==
+Opcion: 14
+
+== MONTO ==
+Monto ($): 350000
+
+== OBSERVACION ==
+Observacion: asignacion de caja menor
+
+== SOPORTE ==
+Soporte: 001
+
+== FECHA DEL MOVIMIENTO ==
+Fecha [2026-05-24]: 2026-05-24
+
+> > Recibo registrado exitosamente.
+
+NO debe aparecer:
+
+* Unidad Constructiva
+* Cantidad instalada
+
+========================================
+2. VER MOVIMIENTOS
+==================
+
+Este módulo ahora debe permitir:
+
+* Consultar movimientos financieros
+* Asociar unidades constructivas instaladas
+* Registrar cantidades ejecutadas
+
+Aquí SÍ deben aparecer las unidades constructivas.
+
+Ejemplo:
+
+========================================
+UNIDADES CONSTRUCTIVAS INSTALADAS
+=================================
+
+Seleccione unidad constructiva:
+
+1. ANDEN 1.20M
+2. BORDILLO TIPO A
+3. ZONA VERDE 1"-P80
+4. TUBERIA PVC 6"
+5. SUMIDERO S1
+
+Opcion: 3
+
+Cantidad instalada: 120
+
+Observacion tecnica:
+Zona verde instalada frente etapa 2
+
+> > Unidad constructiva asociada exitosamente.
+
+IMPORTANTE:
+Las cantidades deben almacenarse en una tabla independiente.
+
+========================================
+3. VER RESUMEN
+==============
+
+Este módulo debe mostrar:
+
+* Total de gastos
+* Total por centro de costos
+* Total por item
+* Total de unidades constructivas ejecutadas
+* Relación gasto vs unidad constructiva
+
+Ejemplo:
+
+---
+
+## UNIDAD CONSTRUCTIVA
+
+ZONA VERDE 1"-P80
+
+Cantidad instalada:
+120 m2
+
+Gasto asociado:
+$ 3.500.000
+
+Costo unitario:
+$ 29.166 / m2
+
+---
+
+El resumen debe cruzar:
+
+* movimientos financieros
+  VS
+* cantidades instaladas
+
+========================================
+4. GENERAR LIQUIDACION
+======================
+
+Este módulo debe generar:
+
+* Consolidado financiero
+* Consolidado técnico
+* Costos por unidad constructiva
+* Cantidades ejecutadas
+* Valor unitario ejecutado
+
+Debe incluir:
+
+* PDF
+* Exportación
+* Cruce financiero/técnico
+* Indicadores de costo unitario
+
+========================================
+CAMBIOS ESTRUCTURALES IMPORTANTES
+=================================
+
+1. Crear nueva tabla:
+
+unidades_ejecutadas
+
+Campos sugeridos:
+
+* id
+* movimiento_id
+* unidad_constructiva_id
+* cantidad
+* observacion
+* fecha
+* usuario
+
+2. Eliminar relación de unidades constructivas dentro de:
+   registrar_movimiento()
+
+3. Crear funciones nuevas:
+
+* registrar_unidad_ejecutada()
+* consultar_unidades_ejecutadas()
+* calcular_costos_unitarios()
+* generar_resumen_tecnico()
+* generar_liquidacion_tecnica()
+
+4. Actualizar navegación del Index.
+
+5. Mantener compatibilidad con:
+
+* SQLite
+* db.py
+* reportlab
+* estructura actual del proyecto
+
+========================================
+OBJETIVO FINAL DEL REDISEÑO
+===========================
+
+Separar completamente:
+
+A. FLUJO FINANCIERO
+(registro de caja menor)
+
+de
+
+B. FLUJO TECNICO
+(unidades constructivas ejecutadas)
+
+Porque posteriormente:
+las cantidades instaladas deberán relacionarse con los gastos para determinar:
+
+* rendimiento
+* costo unitario
+* consumo por actividad
+* análisis financiero por unidad constructiva
+
+El sistema debe quedar preparado para análisis técnicos y financieros reales de obra civil.

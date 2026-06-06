@@ -1,0 +1,22 @@
+CAPA FINANCIERA
+│
+├── movimientos
+├── items
+├── cc
+└── responsables
+
+CAPA TECNICA
+│
+├── unidades_constructivas
+└── unidades_ejecutadas
+
+CAPA COSTEO
+│
+└── calcular_costos_unitarios()
+
+CAPA ANALITICA
+│
+├── resumen
+├── indicadores
+├── liquidacion
+└── pdf
