@@ -15,6 +15,7 @@
       {% endif %}
       {% if puede_ver(user.rol, 'gerencial') %}
         <a href="{{ url_for('gerencial') }}" class="{{ 'active' if pantalla=='gerencial' }}">Analítica gerencial</a>
+        <a href="{{ url_for('memoria') }}" class="{{ 'active' if pantalla=='memoria' }}">Memoria</a>
       {% endif %}
       {% if puede_ver(user.rol, 'configuracion') %}
         <a href="{{ url_for('configuracion') }}" class="{{ 'active' if pantalla=='configuracion' }}">Configuración</a>

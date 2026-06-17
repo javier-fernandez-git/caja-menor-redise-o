@@ -32,6 +32,16 @@
       <tr><td>Inferidos</td><td class="num">${c.inferidos ?? 0}</td></tr>
       <tr><td>Sospechosos</td><td class="num">${c.sospechosos ?? 0} (${c.pct_sospechosos ?? 0}%)</td></tr>`;
 
+    const pg = t.prediccion_gasto || {};
+    if (pg.proyeccion && pg.proyeccion.length) {
+      $("pred-resumen").textContent =
+        `Promedio diario ${pesos(pg.promedio_diario)} · tendencia ` +
+        `${pg.tendencia_diaria >= 0 ? "↑" : "↓"} ${pesos(Math.abs(pg.tendencia_diaria))}/día · ` +
+        `gasto proyectado próximos ${pg.horizonte} días: ${pesos(pg.gasto_proyectado_total)}.`;
+    } else {
+      $("pred-resumen").textContent = pg.nota || "Histórico insuficiente para proyectar.";
+    }
+
     $("tbody-alert").innerHTML = (t.alertas || []).length
       ? t.alertas.map((a) => `<tr><td>${a.fecha}</td><td>${a.item}</td>
           <td class="num">${pesos(a.valor)}</td><td class="num">${pesos(a.umbral)}</td>

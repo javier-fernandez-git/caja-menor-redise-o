@@ -23,6 +23,7 @@ from services import (
     prediccion_service,
     mdm_service,
     tecnico_service,
+    memoria_service,
 )
 import timeline_engine
 import event_engine
@@ -52,7 +53,7 @@ ANALITICA_PREFIJOS = (
     "/api/tablero", "/api/causal", "/api/correlaciones", "/api/prediccion",
     "/api/sobreconsumo", "/api/reportes", "/api/eventos", "/api/contabilidad",
     "/api/timeline", "/api/dashboard", "/api/costos-unitarios",
-    "/api/resumen-tecnico",
+    "/api/resumen-tecnico", "/api/memoria",
 )
 CONFIG_PREFIJOS = ("/api/mdm", "/api/catalogo", "/api/homologar/equivalencia",
                    "/api/usuarios")
@@ -154,6 +155,12 @@ def gerencial():
 def configuracion():
     return render_template("configuracion.html", pantalla="configuracion",
                            **_catalogos())
+
+
+@app.route("/memoria")
+@auth.rol_required("gerencial")
+def memoria():
+    return render_template("memoria.html", pantalla="memoria", **_catalogos())
 
 
 @app.route("/guia")
@@ -714,6 +721,45 @@ def api_catalogo_eliminar(tipo, item_id):
         return jsonify({"ok": False,
                         "error": "No se puede eliminar: esta en uso por "
                                  "movimientos u otros registros."}), 409
+
+
+# ===================================================
+# ETAPA 6 — MEMORIA ORGANIZACIONAL CONSULTABLE
+# ===================================================
+
+@app.route("/api/memoria/consultar")
+def api_memoria_consultar():
+    return jsonify(memoria_service.consultar(request.args.get("q", "")))
+
+
+@app.route("/api/memoria/narrativa")
+def api_memoria_narrativa():
+    narrativa = memoria_service.narrar(
+        contrato_id=request.args.get("contrato_id", type=int),
+        centro_costo_id=request.args.get("centro_costo_id", type=int),
+        fecha_ini=request.args.get("fecha_ini"),
+        fecha_fin=request.args.get("fecha_fin"),
+    )
+    return jsonify({"narrativa": narrativa})
+
+
+@app.route("/api/memoria/exportar")
+def api_memoria_exportar():
+    formato = request.args.get("formato", "md")
+    contenido = memoria_service.exportar(
+        formato=formato,
+        contrato_id=request.args.get("contrato_id", type=int),
+        centro_costo_id=request.args.get("centro_costo_id", type=int),
+        fecha_ini=request.args.get("fecha_ini"),
+        fecha_fin=request.args.get("fecha_fin"),
+    )
+    if formato == "json":
+        return Response(contenido, mimetype="application/json",
+                        headers={"Content-Disposition":
+                                 'attachment; filename="memoria.json"'})
+    return Response(contenido, mimetype="text/markdown",
+                    headers={"Content-Disposition":
+                             'attachment; filename="memoria.md"'})
 
 
 # ---------------------------------------------------

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block titulo %}Memoria organizacional{% endblock %}
+{% block contenido %}
+<h1>Memoria organizacional consultable</h1>
+<p class="sub">Pregunta en lenguaje natural sobre lo que ocurrió en los contratos.</p>
+
+<div class="card">
+  <h2>Preguntar</h2>
+  <div class="field">
+    <label for="q">Tu pregunta</label>
+    <input id="q" placeholder="ej. ¿qué ocurrió en el contrato libano entre 2026-02-01 y 2026-04-30?"
+           autocomplete="off">
+  </div>
+  <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap">
+    <button id="btn-preguntar">Preguntar</button>
+    <button class="btn ghost" data-ej="¿cuánto se gastó en coralina del sol?">Ej: gasto</button>
+    <button class="btn ghost" data-ej="¿por qué subió el costo en libano?">Ej: causa</button>
+    <button class="btn ghost" data-ej="¿qué ocurrió en libano 2000?">Ej: timeline</button>
+  </div>
+  <div id="respuesta" class="card" style="margin-top:16px; background:#f8fafc; display:none">
+    <p id="resp-texto" style="line-height:1.7"></p>
+    <p class="hint" id="resp-meta" style="margin-top:8px"></p>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Reconstrucción narrativa + exportación</h2>
+  <div class="grid">
+    <div class="field"><label for="m-contrato">Contrato</label>
+      <select id="m-contrato"><option value="">Todos</option>
+        {% for o in obras %}<option value="{{ o.id }}">{{ o.nombre }}</option>{% endfor %}
+      </select></div>
+    <div class="field"><label for="m-ini">Desde</label><input id="m-ini" type="date"></div>
+    <div class="field"><label for="m-fin">Hasta</label><input id="m-fin" type="date"></div>
+  </div>
+  <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap">
+    <button id="btn-narrar">Reconstruir narrativa</button>
+    <a class="btn ghost" id="exp-md" target="_blank">Exportar Markdown</a>
+    <a class="btn ghost" id="exp-json" target="_blank">Exportar JSON</a>
+  </div>
+  <p id="narrativa" class="hint" style="margin-top:12px; line-height:1.7"></p>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='memoria.js') }}"></script>
+{% endblock %}

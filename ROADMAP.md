@@ -14,7 +14,7 @@ La versión de la app sube con cada etapa (ver `CHANGELOG.md` y `src/config.py`)
 | 3. Gobernanza de datos (MDM) | 0.3.0 | ✅ Completada |
 | 4. Capa analítica + PDF | 0.4.0 | ✅ Completada |
 | 5. UI para usuarios inconsistentes | 0.5.0 | ✅ Completada |
-| 6. Memoria organizacional consultable | 0.6.0 | ⏳ Pendiente |
+| 6. Memoria organizacional consultable | 0.6.0 | ✅ Completada |
 | Estabilización y release | 1.0.0 | ⏳ Pendiente |
 
 ---
@@ -103,15 +103,16 @@ La versión de la app sube con cada etapa (ver `CHANGELOG.md` y `src/config.py`)
 
 ---
 
-## Etapa 6 — Memoria organizacional consultable  ⏳  (v0.6.0)
+## Etapa 6 — Memoria organizacional consultable  ✅  (v0.6.0)
 
 > Convertir actividad humana fragmentada en inteligencia consultable.
 
-- [ ] Consulta del timeline en lenguaje natural
+- [x] Consulta del timeline en lenguaje natural (`memoria_engine.consultar`)
       (*"¿qué ocurrió en el contrato X entre A y B?"*)
-- [ ] Reconstrucción narrativa de cronologías corporativas
-- [ ] Indicadores predictivos integrados al dashboard
-- [ ] Exportación de memoria organizacional
+- [x] Reconstrucción narrativa de cronologías corporativas (`narrar`)
+- [x] Indicadores predictivos integrados al tablero (`prediccion_gasto`)
+- [x] Exportación de memoria organizacional (Markdown / JSON)
+- [x] Pantalla `/memoria` (rol gerencial)
 
 ---
 

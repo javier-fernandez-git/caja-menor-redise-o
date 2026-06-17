@@ -9,7 +9,23 @@ La versión vive en `src/config.py` (`APP_VERSION`).
 ## [No publicado]
 
 ### Por hacer
-- Etapa 6 (memoria organizacional consultable). Ver `ROADMAP.md`.
+- Estabilización hacia 1.0.0 (pruebas, empaquetado, backup de datos). Ver `ROADMAP.md`.
+
+## [0.6.0] — 2026-06-17 — Etapa 6: Memoria organizacional consultable
+
+### Añadido
+- **Consulta en lenguaje natural** (`memoria_engine.consultar`): parser de
+  intención (timeline / financiero / causal / producción), detección de
+  contrato (por tokens contra los maestros MDM) y de período (fechas, `YYYY-MM`,
+  meses), y respuesta narrada desde el repositorio de eventos.
+- **Reconstrucción narrativa** de la cronología corporativa (`narrar`).
+- **Exportación de memoria** en Markdown y JSON (`exportar`).
+- **Indicadores predictivos integrados al tablero**: el tablero gerencial
+  incluye `prediccion_gasto` (promedio diario, tendencia, proyección).
+- Pantalla **`/memoria`** (rol gerencial) con búsqueda NL, narrativa y export.
+- `services/memoria_service.py`; endpoints `/api/memoria/consultar`,
+  `/api/memoria/narrativa`, `/api/memoria/exportar`.
+- Versión → **0.6.0** (roadmap funcional del prompt completo).
 
 ## [0.5.1] — 2026-06-17 — Cierre de Etapa 5
 
@@ -129,6 +145,7 @@ La versión vive en `src/config.py` (`APP_VERSION`).
   movimientos existentes a la capa de eventos (backfill idempotente).
 
 [No publicado]: ./ROADMAP.md
+[0.6.0]: ./CHANGELOG.md
 [0.5.1]: ./CHANGELOG.md
 [0.5.0]: ./CHANGELOG.md
 [0.4.0]: ./CHANGELOG.md

@@ -76,10 +76,16 @@ def tablero_gerencial(contrato_id=None, centro_costo_id=None, responsable_id=Non
             contrato_id=contrato_id, centro_costo_id=centro_costo_id,
             fecha_ini=fecha_ini, fecha_fin=fecha_fin)
 
+    # Indicadores predictivos integrados al tablero (Etapa 6)
+    prediccion_gasto = predictive_engine.predecir_gasto(
+        contrato_id=contrato_id, centro_costo_id=centro_costo_id,
+        fecha_ini=fecha_ini, fecha_fin=fecha_fin)
+
     costo_obra = base["obra"]["costo_obra"]
     utilidad = facturacion["utilidad_estimada"] if facturacion else None
 
     return {
+        "prediccion_gasto": prediccion_gasto,
         "caja": base["caja"],
         "obra": base["obra"],
         "utilidad_estimada": utilidad,
