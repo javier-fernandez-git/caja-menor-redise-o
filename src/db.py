@@ -140,6 +140,49 @@ def inicializar():
                 ON eventos_corporativos(contrato_id, fecha);
             CREATE INDEX IF NOT EXISTS idx_eventos_cc
                 ON eventos_corporativos(centro_costo_id, fecha);
+
+            -- ===================================================
+            -- GOBERNANZA DE DATOS (MDM basico)
+            -- Una entidad maestra por dominio = ID corporativo universal.
+            -- Subsume contratos_master / centros_costos_master / items_master
+            -- / dependencias_master / sedes_master en una sola tabla por dominio.
+            -- ===================================================
+            CREATE TABLE IF NOT EXISTS mdm_maestros (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                dominio         TEXT NOT NULL,   -- contrato|centro_costo|item|dependencia|sede|empleado
+                codigo          TEXT,            -- codigo corporativo (ej. OT 373460551)
+                nombre_canonico TEXT NOT NULL,
+                area_propietaria TEXT,           -- finanzas|rrhh|operaciones|compras|gerencia
+                estado          TEXT NOT NULL DEFAULT 'ACTIVO',  -- ACTIVO|INACTIVO
+                catalogo_id     INTEGER,         -- enlace al catalogo operativo (obras.id, etc.)
+                creado_en       TEXT,
+                UNIQUE(dominio, nombre_canonico)
+            );
+
+            -- Convergencia de IDs (Regla #3): nombres alternos -> mismo maestro.
+            CREATE TABLE IF NOT EXISTS mdm_alias (
+                id        INTEGER PRIMARY KEY AUTOINCREMENT,
+                dominio   TEXT NOT NULL,
+                master_id INTEGER NOT NULL REFERENCES mdm_maestros(id) ON DELETE CASCADE,
+                alias     TEXT NOT NULL,
+                origen    TEXT DEFAULT 'manual',
+                UNIQUE(dominio, alias)
+            );
+
+            -- Permisos por area: quien puede crear/editar cada dominio maestro.
+            CREATE TABLE IF NOT EXISTS mdm_permisos (
+                id           INTEGER PRIMARY KEY AUTOINCREMENT,
+                area         TEXT NOT NULL,
+                dominio      TEXT NOT NULL,
+                puede_crear  INTEGER NOT NULL DEFAULT 0,
+                puede_editar INTEGER NOT NULL DEFAULT 0,
+                UNIQUE(area, dominio)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_mdm_maestros_dom
+                ON mdm_maestros(dominio, estado);
+            CREATE INDEX IF NOT EXISTS idx_mdm_alias_dom
+                ON mdm_alias(dominio, alias);
         """)
 
         _migrar_movimientos_financieros(conn)
@@ -158,8 +201,11 @@ def inicializar():
     # Import perezoso para evitar dependencias circulares (estos modulos usan db).
     import normalizador
     import event_engine
+    import mdm
     normalizador.sembrar_diccionario()
     event_engine.backfill_desde_movimientos()
+    mdm.sembrar_permisos()
+    mdm.sembrar_maestros_desde_catalogos()
 
 
 def _columnas_tabla(conn, tabla):

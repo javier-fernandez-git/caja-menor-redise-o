@@ -9,8 +9,26 @@ La versión vive en `src/config.py` (`APP_VERSION`).
 ## [No publicado]
 
 ### Por hacer
-- Etapa 3 (MDM), Etapa 4 (PDF), Etapa 5 (UI), Etapa 6 (memoria consultable).
-  Ver `ROADMAP.md`.
+- Etapa 4 (PDF), Etapa 5 (UI), Etapa 6 (memoria consultable). Ver `ROADMAP.md`.
+
+## [0.3.0] — 2026-06-16 — Etapa 3: Gobernanza de datos (MDM)
+
+### Añadido
+- **MDM básico**: tablas `mdm_maestros`, `mdm_alias`, `mdm_permisos`.
+  Una entidad maestra por dominio (contrato, centro_costo, item, dependencia,
+  sede, empleado) = el ID corporativo universal.
+- **Convergencia de IDs** (`mdm.resolver_id_universal`, Regla #3): resuelve
+  nombres/alias/parciales al mismo maestro (alias → exacto → homologación →
+  contención por tokens → similitud).
+- **Permisos por área** (`mdm_permisos`): finanzas crea centros de costo,
+  RRHH crea empleados, etc. `crear_maestro` lanza `PermisoDenegado`.
+- Siembra de maestros desde los catálogos operativos y de permisos por defecto.
+- `services/mdm_service.py` como fachada.
+- Catálogo de equivalencias administrable desde API.
+- Endpoints: `/api/mdm/dominios`, `/api/mdm/maestros` (GET/POST),
+  `/api/mdm/resolver`, `/api/mdm/alias` (GET/POST), `/api/mdm/estado`,
+  `/api/mdm/permisos`, `/api/homologar/equivalencia`.
+- Versión → **0.3.0**.
 
 ## [0.2.0] — 2026-06-16 — Etapa 2: Inteligencia operacional
 
@@ -53,5 +71,6 @@ La versión vive en `src/config.py` (`APP_VERSION`).
   movimientos existentes a la capa de eventos (backfill idempotente).
 
 [No publicado]: ./ROADMAP.md
+[0.3.0]: ./CHANGELOG.md
 [0.2.0]: ./CHANGELOG.md
 [0.1.0]: ./CHANGELOG.md

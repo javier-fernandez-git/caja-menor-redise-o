@@ -16,10 +16,12 @@ from services import (
     contabilidad_service,
     analitica_service,
     prediccion_service,
+    mdm_service,
 )
 import timeline_engine
 import event_engine
 import config
+from mdm import PermisoDenegado
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -317,6 +319,114 @@ def _filtros_temporales_simple():
         fecha_ini=request.args.get("fecha_ini"),
         fecha_fin=request.args.get("fecha_fin"),
     )
+
+
+# ===================================================
+# ETAPA 3 — GOBERNANZA DE DATOS (MDM)
+# ===================================================
+
+@app.route("/api/mdm/dominios")
+def api_mdm_dominios():
+    return jsonify(mdm_service.dominios())
+
+
+@app.route("/api/mdm/maestros")
+def api_mdm_maestros():
+    return jsonify(mdm_service.maestros(
+        dominio=request.args.get("dominio"),
+        estado=request.args.get("estado"),
+    ))
+
+
+@app.route("/api/mdm/maestros", methods=["POST"])
+def api_mdm_crear_maestro():
+    data = request.get_json(force=True, silent=True) or {}
+    try:
+        master_id = mdm_service.crear_maestro(
+            dominio=data.get("dominio"),
+            nombre=data.get("nombre"),
+            area_actor=data.get("area_actor"),
+            codigo=data.get("codigo"),
+        )
+        return jsonify({"ok": True, "master_id": master_id})
+    except PermisoDenegado as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 403
+    except (ValueError, Exception) as exc:  # noqa: BLE001
+        return jsonify({"ok": False, "error": str(exc)}), 400
+
+
+# --- Convergencia de IDs (Regla #3) ---
+@app.route("/api/mdm/resolver")
+def api_mdm_resolver():
+    dominio = request.args.get("dominio")
+    texto = request.args.get("texto", "")
+    try:
+        return jsonify(mdm_service.resolver(dominio, texto))
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+
+
+# --- Alias (convergencia) ---
+@app.route("/api/mdm/alias")
+def api_mdm_alias():
+    return jsonify(mdm_service.alias(
+        dominio=request.args.get("dominio"),
+        master_id=request.args.get("master_id", type=int),
+    ))
+
+
+@app.route("/api/mdm/alias", methods=["POST"])
+def api_mdm_crear_alias():
+    data = request.get_json(force=True, silent=True) or {}
+    try:
+        mdm_service.registrar_alias(
+            dominio=data.get("dominio"),
+            master_id=data.get("master_id"),
+            alias_texto=data.get("alias"),
+            area_actor=data.get("area_actor"),
+        )
+        return jsonify({"ok": True})
+    except PermisoDenegado as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 403
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"ok": False, "error": str(exc)}), 400
+
+
+# --- Estado de un maestro ---
+@app.route("/api/mdm/estado", methods=["POST"])
+def api_mdm_estado():
+    data = request.get_json(force=True, silent=True) or {}
+    try:
+        mdm_service.cambiar_estado(
+            dominio=data.get("dominio"),
+            master_id=data.get("master_id"),
+            estado=data.get("estado"),
+            area_actor=data.get("area_actor"),
+        )
+        return jsonify({"ok": True})
+    except PermisoDenegado as exc:
+        return jsonify({"ok": False, "error": str(exc)}), 403
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"ok": False, "error": str(exc)}), 400
+
+
+# --- Permisos por area ---
+@app.route("/api/mdm/permisos")
+def api_mdm_permisos():
+    return jsonify(mdm_service.permisos(area=request.args.get("area")))
+
+
+# --- Catalogo de equivalencias administrable ---
+@app.route("/api/homologar/equivalencia", methods=["POST"])
+def api_homologar_equivalencia():
+    data = request.get_json(force=True, silent=True) or {}
+    ok = mdm_service.registrar_equivalencia(
+        dominio=data.get("dominio", "item"),
+        variante=data.get("variante"),
+        canonico=data.get("canonico"),
+        canonico_id=data.get("canonico_id"),
+    )
+    return jsonify({"ok": bool(ok)})
 
 
 # ---------------------------------------------------

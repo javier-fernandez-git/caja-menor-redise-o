@@ -11,11 +11,13 @@ Mapa de versiones <-> etapas del ROADMAP:
                     dos contabilidades, services, timeline, score)
     0.2.0  Etapa 2  Inteligencia operacional (motor causal, correlaciones,
                     prediccion, deteccion de sobreconsumo)
+    0.3.0  Etapa 3  Gobernanza de datos / MDM (maestros, convergencia de IDs,
+                    permisos por area, equivalencias administrables)
 """
 
 APP_NAME = "Sistema de Reconstruccion Operacional-Financiera"
-APP_VERSION = "0.2.0"
-ETAPA_ACTUAL = "Etapa 2 - Inteligencia operacional"
+APP_VERSION = "0.3.0"
+ETAPA_ACTUAL = "Etapa 3 - Gobernanza de datos (MDM)"
 
 
 # ----------------------------------------------------------------------

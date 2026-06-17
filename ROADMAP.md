@@ -11,7 +11,7 @@ La versión de la app sube con cada etapa (ver `CHANGELOG.md` y `src/config.py`)
 |-------|---------|--------|
 | 1. Núcleo | 0.1.0 | ✅ Completada |
 | 2. Inteligencia operacional | 0.2.0 | ✅ Completada |
-| 3. Gobernanza de datos (MDM) | 0.3.0 | ⏳ Pendiente |
+| 3. Gobernanza de datos (MDM) | 0.3.0 | ✅ Completada |
 | 4. Capa analítica + PDF | 0.4.0 | ⏳ Pendiente |
 | 5. UI para usuarios inconsistentes | 0.5.0 | ⏳ Pendiente |
 | 6. Memoria organizacional consultable | 0.6.0 | ⏳ Pendiente |
@@ -53,16 +53,17 @@ La versión de la app sube con cada etapa (ver `CHANGELOG.md` y `src/config.py`)
 
 ---
 
-## Etapa 3 — Gobernanza de datos (MDM)  ⏳  (v0.3.0)
+## Etapa 3 — Gobernanza de datos (MDM)  ✅  (v0.3.0)
 
 > Master Data Management básico + permisos por área.
 
-- [ ] Tablas maestras: `contratos_master`, `centros_costos_master`,
-      `items_master`, `dependencias_master`, `sedes_master`
-- [ ] Repositorio central `eventos_corporativos` recibiendo de todos los módulos
-- [ ] Permisos por área (finanzas crea centros de costo; RRHH crea empleados)
-- [ ] Reglas de convergencia de IDs (proyecto/frente/contrato → ID universal)
-- [ ] Catálogo de equivalencias administrable desde UI
+- [x] Tablas maestras por dominio (`mdm_maestros` subsume `contratos_master`,
+      `centros_costos_master`, `items_master`, `dependencias_master`,
+      `sedes_master` y `empleados`)
+- [x] Repositorio central `eventos_corporativos` recibiendo de todos los módulos *(Etapa 1)*
+- [x] Permisos por área (`mdm_permisos`: finanzas crea centros de costo; RRHH crea empleados)
+- [x] Reglas de convergencia de IDs (`resolver_id_universal`: proyecto/frente/contrato → ID universal)
+- [x] Catálogo de equivalencias administrable (`/api/homologar/equivalencia`)
 
 ---
 
