@@ -8,6 +8,17 @@ from flask import (
 from pathlib import Path
 import db
 
+# Capas nuevas (Etapa 1: nucleo)
+from services import (
+    homologacion_service,
+    financiero_service,
+    costeo_service,
+    contabilidad_service,
+    analitica_service,
+)
+import timeline_engine
+import event_engine
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -132,6 +143,92 @@ def api_unidades_ejecutadas():
 def api_resumen_tecnico():
 
     return jsonify(db.generar_resumen_tecnico(
+        responsable_id=request.args.get("responsable_id", type=int),
+        obra_id=request.args.get("obra_id", type=int),
+        fecha_ini=request.args.get("fecha_ini"),
+        fecha_fin=request.args.get("fecha_fin"),
+    ))
+
+
+# ===================================================
+# CAPAS NUEVAS (Etapa 1: nucleo)
+# ===================================================
+
+def _filtros_temporales():
+    """Filtros comunes leidos de la query string."""
+    return dict(
+        contrato_id=request.args.get("contrato_id", type=int)
+                    or request.args.get("obra_id", type=int),
+        centro_costo_id=request.args.get("centro_costo_id", type=int)
+                        or request.args.get("cc_id", type=int),
+        responsable_id=request.args.get("responsable_id", type=int),
+        fecha_ini=request.args.get("fecha_ini"),
+        fecha_fin=request.args.get("fecha_fin"),
+    )
+
+
+# --- Homologacion semantica ---
+@app.route("/api/homologar")
+def api_homologar():
+    texto = request.args.get("texto", "")
+    dominio = request.args.get("dominio", "item")
+    return jsonify(homologacion_service.homologar(texto, dominio))
+
+
+# --- Registro financiero (orquestado: persiste + emite evento) ---
+@app.route("/api/movimientos", methods=["POST"])
+def api_registrar_movimiento():
+    data = request.get_json(force=True, silent=True) or {}
+    try:
+        resultado = financiero_service.registrar_movimiento(
+            responsable_id=data.get("responsable_id"),
+            tipo_id=data.get("tipo_id"),
+            monto=data.get("monto", 0),
+            cc_id=data.get("cc_id"),
+            item_id=data.get("item_id"),
+            obra_id=data.get("obra_id"),
+            fecha=data.get("fecha"),
+            observacion=data.get("observacion"),
+            soporte=data.get("soporte"),
+            usuario=data.get("usuario"),
+        )
+        return jsonify({"ok": True, **resultado})
+    except Exception as exc:  # noqa: BLE001 - reportar al cliente
+        return jsonify({"ok": False, "error": str(exc)}), 400
+
+
+# --- Eventos corporativos (event sourcing) ---
+@app.route("/api/eventos")
+def api_eventos():
+    return jsonify(event_engine.consultar_eventos(
+        tipo_evento=request.args.get("tipo_evento"),
+        score_minimo=request.args.get("score_minimo", type=float),
+        **_filtros_temporales(),
+    ))
+
+
+# --- Dos contabilidades (caja vs obra) ---
+@app.route("/api/contabilidad")
+def api_contabilidad():
+    return jsonify(contabilidad_service.estado(**_filtros_temporales()))
+
+
+# --- Timeline corporativo ---
+@app.route("/api/timeline")
+def api_timeline():
+    return jsonify(timeline_engine.reconstruir_timeline(**_filtros_temporales()))
+
+
+# --- Dashboard gerencial ---
+@app.route("/api/dashboard")
+def api_dashboard():
+    return jsonify(analitica_service.dashboard(**_filtros_temporales()))
+
+
+# --- Costos unitarios reales ---
+@app.route("/api/costos-unitarios")
+def api_costos_unitarios():
+    return jsonify(costeo_service.calcular_costos_unitarios(
         responsable_id=request.args.get("responsable_id", type=int),
         obra_id=request.args.get("obra_id", type=int),
         fecha_ini=request.args.get("fecha_ini"),

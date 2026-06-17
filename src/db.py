@@ -14,6 +14,7 @@ ITEMS_CSV = DATA_DIR / "descripciones.csv"
 RESPONSABLES_CSV = DATA_DIR / "responsables.csv"
 TIPOS_CSV = DATA_DIR / "tipo_de_movimientos.csv"
 CC_CSV = DATA_DIR / "centro_de_costos.csv"
+MOVIMIENTOS_CSV = DATA_DIR / "movimientos.csv"
 
 
 def conectar():
@@ -91,6 +92,54 @@ def inicializar():
 
             INSERT OR IGNORE INTO consecutivo (id, ultimo)
             VALUES (1, 1000);
+
+            -- ===================================================
+            -- CAPA SEMANTICA (homologacion)
+            -- Mapea lenguaje humano inconsistente -> canonico
+            -- ===================================================
+            CREATE TABLE IF NOT EXISTS diccionario_semantico (
+                id        INTEGER PRIMARY KEY AUTOINCREMENT,
+                dominio   TEXT NOT NULL,   -- item | centro_costo | contrato | dependencia
+                variante  TEXT NOT NULL,   -- forma normalizada de la entrada humana
+                canonico  TEXT NOT NULL,   -- lenguaje corporativo universal
+                canonico_id INTEGER,       -- id del catalogo maestro, si aplica
+                origen    TEXT DEFAULT 'manual',  -- manual | inferido
+                UNIQUE(dominio, variante)
+            );
+
+            -- ===================================================
+            -- CAPA DE EVENTOS (event sourcing)
+            -- Registros inmutables: NO se sobrescriben.
+            -- ===================================================
+            CREATE TABLE IF NOT EXISTS eventos_corporativos (
+                evento_id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                fecha                TEXT NOT NULL,
+                tipo_evento          TEXT NOT NULL,   -- FINANCIERO | TECNICO | ...
+                subtipo_evento       TEXT,            -- GASTO | ASIGNACION | PRODUCCION | ...
+                contrato_id          INTEGER,         -- obra / proyecto / frente -> ID universal
+                centro_costo_id      INTEGER,
+                dependencia_id       INTEGER,
+                responsable_id       INTEGER,
+                item_id              INTEGER,
+                valor                REAL DEFAULT 0,
+                cantidad             REAL,
+                descripcion_original   TEXT,
+                descripcion_normalizada TEXT,
+                fuente               TEXT,            -- modulo / tabla de origen
+                usuario              TEXT,
+                timestamp_creacion   TEXT NOT NULL,
+                score_confiabilidad  REAL NOT NULL DEFAULT 1.0,
+                origen_tabla         TEXT,            -- idempotencia del backfill
+                origen_id            INTEGER,
+                UNIQUE(origen_tabla, origen_id)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_eventos_fecha
+                ON eventos_corporativos(fecha);
+            CREATE INDEX IF NOT EXISTS idx_eventos_contrato
+                ON eventos_corporativos(contrato_id, fecha);
+            CREATE INDEX IF NOT EXISTS idx_eventos_cc
+                ON eventos_corporativos(centro_costo_id, fecha);
         """)
 
         _migrar_movimientos_financieros(conn)
@@ -103,6 +152,14 @@ def inicializar():
     importar_items_gasto()
     importar_unidades_constructivas()
     separar_unidades_de_items()
+    importar_movimientos_historicos()
+
+    # --- Capas nuevas (Etapa 1: nucleo) ---
+    # Import perezoso para evitar dependencias circulares (estos modulos usan db).
+    import normalizador
+    import event_engine
+    normalizador.sembrar_diccionario()
+    event_engine.backfill_desde_movimientos()
 
 
 def _columnas_tabla(conn, tabla):
@@ -356,6 +413,100 @@ def separar_unidades_de_items():
             DELETE FROM items
             WHERE upper(nombre) IN ({placeholders})
         """, nombres_unidades)
+
+
+def importar_movimientos_historicos():
+    """
+    Siembra la tabla movimientos desde data/movimientos.csv (una sola vez).
+
+    El CSV guarda nombres, no IDs: aqui se resuelven contra los catalogos.
+    Es la actividad humana fragmentada que el sistema reconstruira como
+    eventos homologados. Solo corre si la tabla esta vacia (idempotente).
+    """
+    if not MOVIMIENTOS_CSV.exists():
+        return 0
+
+    with conectar() as conn:
+        ya_hay = conn.execute("SELECT COUNT(*) AS n FROM movimientos").fetchone()["n"]
+        if ya_hay:
+            return 0
+
+        def _mapa(tabla, columna):
+            return {
+                (r[columna] or "").strip().upper(): r["id"]
+                for r in conn.execute(f"SELECT id, {columna} AS {columna} FROM {tabla}")
+            }
+
+        resp_map = _mapa("responsables", "nombre")
+        obra_map = _mapa("obras", "nombre")
+        item_map = _mapa("items", "nombre")
+        tipo_map = {
+            (r["texto"] or "").strip().upper(): r["id"]
+            for r in conn.execute("SELECT id, texto FROM tipo_movimientos")
+        }
+
+        importados = 0
+        with MOVIMIENTOS_CSV.open(newline="", encoding="utf-8-sig") as archivo:
+            for row in csv.DictReader(archivo):
+                row = {(k or "").strip().lower(): (v or "").strip()
+                       for k, v in row.items()}
+                tipo_texto = row.get("tipo", "GASTO").upper() or "GASTO"
+
+                # asegurar que el tipo existe (REEMBOLSO no venia en el CSV base)
+                if tipo_texto not in tipo_map:
+                    cur = conn.execute(
+                        "INSERT OR IGNORE INTO tipo_movimientos (texto) VALUES (?)",
+                        (tipo_texto,),
+                    )
+                    fila = conn.execute(
+                        "SELECT id FROM tipo_movimientos WHERE texto = ?",
+                        (tipo_texto,),
+                    ).fetchone()
+                    tipo_map[tipo_texto] = fila["id"]
+
+                recibo = row.get("recibo", "0")
+                recibo = int(recibo) if recibo.isdigit() else 0
+                fecha = row.get("fecha_ini") or row.get("fecha") or ""
+                monto = row.get("monto", "0").replace(",", "")
+                monto = int(monto) if monto.lstrip("-").isdigit() else 0
+                cc = row.get("cc", "")
+                cc_id = int(cc) if cc.isdigit() else None
+
+                responsable_id = resp_map.get(row.get("resp", "").upper())
+                tipo_id = tipo_map.get(tipo_texto)
+                # responsable_id y tipo_id son NOT NULL: omitir filas irresolubles
+                if responsable_id is None or tipo_id is None:
+                    continue
+
+                conn.execute(
+                    """
+                    INSERT INTO movimientos
+                        (recibo, fecha_movimiento, responsable_id, obra_id,
+                         tipo_id, item_id, monto, cc_id, observacion, soporte)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        recibo, fecha,
+                        responsable_id,
+                        obra_map.get(row.get("obra", "").upper()),
+                        tipo_id,
+                        item_map.get(row.get("item", "").upper()),
+                        monto, cc_id, None, None,
+                    ),
+                )
+                importados += 1
+
+    # mantener el consecutivo por encima del maximo recibo historico
+    with conectar() as conn:
+        maximo = conn.execute(
+            "SELECT MAX(recibo) AS m FROM movimientos"
+        ).fetchone()["m"] or 1000
+        conn.execute(
+            "UPDATE consecutivo SET ultimo = ? WHERE id = 1 AND ultimo < ?",
+            (maximo, maximo),
+        )
+
+    return importados
 
 
 # -------------------------------------------------------
