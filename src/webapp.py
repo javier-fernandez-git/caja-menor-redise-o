@@ -15,9 +15,11 @@ from services import (
     costeo_service,
     contabilidad_service,
     analitica_service,
+    prediccion_service,
 )
 import timeline_engine
 import event_engine
+import config
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -234,6 +236,87 @@ def api_costos_unitarios():
         fecha_ini=request.args.get("fecha_ini"),
         fecha_fin=request.args.get("fecha_fin"),
     ))
+
+
+# ===================================================
+# ETAPA 2 — INTELIGENCIA OPERACIONAL
+# ===================================================
+
+@app.route("/api/version")
+def api_version():
+    return jsonify(config.version_info())
+
+
+# --- Motor causal: ¿por que subio el costo? ---
+@app.route("/api/causal")
+def api_causal():
+    return jsonify(prediccion_service.causa_variacion_costo(
+        contrato_id=request.args.get("contrato_id", type=int)
+                    or request.args.get("obra_id", type=int),
+        centro_costo_id=request.args.get("centro_costo_id", type=int)
+                        or request.args.get("cc_id", type=int),
+    ))
+
+
+# --- Correlaciones multivariable ---
+@app.route("/api/correlaciones")
+def api_correlaciones():
+    return jsonify(prediccion_service.correlaciones(
+        umbral=request.args.get("umbral", default=0.5, type=float),
+        **_filtros_temporales_simple(),
+    ))
+
+
+# --- Prediccion de gasto ---
+@app.route("/api/prediccion/gasto")
+def api_prediccion_gasto():
+    return jsonify(prediccion_service.predecir_gasto(
+        horizonte=request.args.get("horizonte", default=7, type=int),
+        **_filtros_temporales_simple(),
+    ))
+
+
+# --- Prediccion de produccion ---
+@app.route("/api/prediccion/produccion")
+def api_prediccion_produccion():
+    return jsonify(prediccion_service.predecir_produccion(
+        horizonte=request.args.get("horizonte", default=7, type=int),
+        **_filtros_temporales_simple(),
+    ))
+
+
+# --- Prediccion de facturacion / utilidad ---
+@app.route("/api/prediccion/facturacion")
+def api_prediccion_facturacion():
+    valor = request.args.get("valor_contrato", type=float)
+    dias = request.args.get("duracion_dias", type=int)
+    if valor is None or dias is None:
+        return jsonify({"error": "valor_contrato y duracion_dias requeridos"}), 400
+    return jsonify(prediccion_service.predecir_facturacion(
+        valor_contrato=valor, duracion_dias=dias,
+        **_filtros_temporales_simple(),
+    ))
+
+
+# --- Deteccion de sobreconsumo / anomalias ---
+@app.route("/api/sobreconsumo")
+def api_sobreconsumo():
+    return jsonify(prediccion_service.detectar_sobreconsumo(
+        k=request.args.get("k", default=2.0, type=float),
+        **_filtros_temporales_simple(),
+    ))
+
+
+def _filtros_temporales_simple():
+    """contrato_id / centro_costo_id / fecha_ini / fecha_fin (sin responsable)."""
+    return dict(
+        contrato_id=request.args.get("contrato_id", type=int)
+                    or request.args.get("obra_id", type=int),
+        centro_costo_id=request.args.get("centro_costo_id", type=int)
+                        or request.args.get("cc_id", type=int),
+        fecha_ini=request.args.get("fecha_ini"),
+        fecha_fin=request.args.get("fecha_fin"),
+    )
 
 
 # ---------------------------------------------------
