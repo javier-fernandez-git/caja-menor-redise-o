@@ -18,8 +18,37 @@ Mapa de versiones <-> etapas del ROADMAP:
 """
 
 APP_NAME = "Sistema de Reconstruccion Operacional-Financiera"
-APP_VERSION = "0.4.0"
-ETAPA_ACTUAL = "Etapa 4 - Analitica avanzada + PDF"
+APP_VERSION = "0.5.1"
+ETAPA_ACTUAL = "Etapa 5 - UI para usuarios inconsistentes (cierre)"
+
+# Clave de sesion Flask. En produccion definir SECRET_KEY por variable de entorno.
+import os
+SECRET_KEY = os.environ.get("SECRET_KEY", "caja-menor-dev-secret-cambiar")
+
+# ----------------------------------------------------------------------
+# ROLES Y PERMISOS DE PANTALLA
+# Separa el registro operativo de la analitica gerencial:
+# los digitadores NO acceden al analisis.
+# ----------------------------------------------------------------------
+ROLES = ("admin", "gerente", "digitador")
+
+# Que pantallas puede ver cada rol.
+ACCESO_PANTALLAS = {
+    "digitador": {"operativo"},
+    "gerente":   {"gerencial"},
+    "admin":     {"operativo", "gerencial", "configuracion"},
+}
+
+# Pantalla de inicio por rol.
+INICIO_POR_ROL = {
+    "digitador": "operativo",
+    "gerente":   "gerencial",
+    "admin":     "gerencial",
+}
+
+
+def puede_ver(rol, pantalla):
+    return pantalla in ACCESO_PANTALLAS.get(rol, set())
 
 
 # ----------------------------------------------------------------------

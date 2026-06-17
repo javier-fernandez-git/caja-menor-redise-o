@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block titulo %}Analítica gerencial{% endblock %}
+{% block contenido %}
+<h1>Analítica gerencial</h1>
+<p class="sub">Tablero, causalidad, trazabilidad y documentos. Reservado a gerencia.</p>
+
+<div class="card">
+  <h2>Filtros</h2>
+  <div class="grid">
+    <div class="field">
+      <label for="f-contrato">Contrato / Obra</label>
+      <select id="f-contrato"><option value="">Todos</option>
+        {% for o in obras %}<option value="{{ o.id }}">{{ o.nombre }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="f-cc">Centro de costo</label>
+      <select id="f-cc"><option value="">Todos</option>
+        {% for c in centros %}<option value="{{ c.id }}">{{ c.contrato }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="f-responsable">Responsable (para liquidación)</label>
+      <select id="f-responsable"><option value="">— Ninguno —</option>
+        {% for r in responsables %}<option value="{{ r.id }}">{{ r.nombre }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field"><label for="f-ini">Desde</label><input id="f-ini" type="date"></div>
+    <div class="field"><label for="f-fin">Hasta</label><input id="f-fin" type="date"></div>
+    <div class="field"><label for="f-valor">Valor contrato ($)</label><input id="f-valor" inputmode="numeric" placeholder="opcional, p/ utilidad"></div>
+    <div class="field"><label for="f-dias">Duración (días)</label><input id="f-dias" inputmode="numeric" placeholder="opcional"></div>
+  </div>
+  <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+    <button id="btn-aplicar">Aplicar</button>
+    <a class="btn ghost" id="pdf-liq" target="_blank">PDF Liquidación</a>
+    <a class="btn ghost" id="pdf-fin" target="_blank">PDF Financiero</a>
+    <a class="btn ghost" id="pdf-trz" target="_blank">PDF Trazabilidad</a>
+  </div>
+  <p class="hint" style="margin-top:8px">La liquidación requiere elegir un responsable arriba.</p>
+</div>
+
+<div class="kpis">
+  <div class="kpi good"><div class="label">Saldo de caja</div><div class="value" id="k-caja">—</div></div>
+  <div class="kpi"><div class="label">Costo de obra</div><div class="value" id="k-obra">—</div></div>
+  <div class="kpi good"><div class="label">Utilidad estimada</div><div class="value" id="k-util">—</div></div>
+  <div class="kpi alert"><div class="label">Alertas sobreconsumo</div><div class="value" id="k-alert">—</div></div>
+</div>
+
+<div class="card">
+  <h2>¿Por qué cambió el costo? (motor causal)</h2>
+  <p id="causal-resumen" class="hint">Cargando…</p>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h2>Top gastos</h2>
+    <table><thead><tr><th>Ítem</th><th class="num">Valor</th></tr></thead>
+      <tbody id="tbody-top"><tr><td colspan="2" class="hint">—</td></tr></tbody></table>
+  </div>
+  <div class="card">
+    <h2>Confiabilidad de datos</h2>
+    <table><tbody id="tbody-conf"><tr><td class="hint">—</td></tr></tbody></table>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Alertas de sobreconsumo</h2>
+  <table><thead><tr><th>Fecha</th><th>Ítem</th><th class="num">Valor</th><th class="num">Umbral</th><th class="num">Exceso</th></tr></thead>
+    <tbody id="tbody-alert"><tr><td colspan="5" class="hint">—</td></tr></tbody></table>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='gerencial.js') }}"></script>
+{% endblock %}

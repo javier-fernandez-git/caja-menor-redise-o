@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block titulo %}Configuración{% endblock %}
+{% block contenido %}
+<h1>Configuración</h1>
+<p class="sub">Catálogos, gobernanza de datos (MDM) y equivalencias. Solo administradores.</p>
+
+<div class="grid">
+  <div class="card">
+    <h2>Agregar al catálogo</h2>
+    <div class="field"><label for="cat-tipo">Tipo</label>
+      <select id="cat-tipo">
+        <option value="responsables">Responsable</option>
+        <option value="obras">Obra / Contrato</option>
+        <option value="items">Ítem / concepto</option>
+        <option value="cc">Centro de costo</option>
+      </select>
+    </div>
+    <div class="field" style="margin-top:10px"><label for="cat-nombre">Nombre</label>
+      <input id="cat-nombre" placeholder="Se guarda en MAYÚSCULAS"></div>
+    <div style="margin-top:12px"><button id="btn-cat">Agregar</button></div>
+  </div>
+
+  <div class="card">
+    <h2>Convergencia de IDs (MDM)</h2>
+    <p class="hint">Resuelve cualquier nombre/alias al ID corporativo universal.</p>
+    <div class="field" style="margin-top:8px"><label for="mdm-dominio">Dominio</label>
+      <select id="mdm-dominio">
+        <option value="contrato">contrato</option>
+        <option value="centro_costo">centro_costo</option>
+        <option value="item">item</option>
+        <option value="dependencia">dependencia</option>
+        <option value="empleado">empleado</option>
+      </select>
+    </div>
+    <div class="field" style="margin-top:10px"><label for="mdm-texto">Texto a resolver</label>
+      <input id="mdm-texto" placeholder="ej. proyecto libano, flota, mantto veh"></div>
+    <div style="margin-top:12px"><button id="btn-mdm">Resolver</button></div>
+    <p id="mdm-resultado" class="hint" style="margin-top:10px"></p>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Enseñar equivalencia (homologación)</h2>
+  <p class="hint">Crea una equivalencia para que futuras entradas se reconozcan exactas.</p>
+  <div class="grid" style="margin-top:8px">
+    <div class="field"><label for="eq-dominio">Dominio</label>
+      <select id="eq-dominio"><option value="item">item</option><option value="centro_costo">centro_costo</option>
+        <option value="contrato">contrato</option><option value="dependencia">dependencia</option></select></div>
+    <div class="field"><label for="eq-variante">Variante (lo que escribe la gente)</label><input id="eq-variante" placeholder="ej. gsln"></div>
+    <div class="field"><label for="eq-canonico">Canónico</label><input id="eq-canonico" placeholder="ej. COMBUSTIBLE"></div>
+  </div>
+  <div style="margin-top:12px"><button id="btn-eq">Guardar equivalencia</button></div>
+</div>
+
+<div class="card">
+  <h2>Catálogo: editar / eliminar</h2>
+  <div class="field" style="max-width:280px"><label for="ce-tipo">Tipo</label>
+    <select id="ce-tipo">
+      <option value="responsables">Responsable</option>
+      <option value="obras">Obra / Contrato</option>
+      <option value="items">Ítem / concepto</option>
+      <option value="cc">Centro de costo</option>
+    </select></div>
+  <table style="margin-top:12px"><thead><tr><th>ID</th><th>Nombre</th><th style="width:160px">Acciones</th></tr></thead>
+    <tbody id="tbody-catalogo"><tr><td colspan="3" class="hint">—</td></tr></tbody></table>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h2>Usuarios</h2>
+    <div class="grid">
+      <div class="field"><label for="u-usuario">Usuario</label><input id="u-usuario" autocomplete="off"></div>
+      <div class="field"><label for="u-nombre">Nombre</label><input id="u-nombre"></div>
+      <div class="field"><label for="u-pass">Contraseña</label><input id="u-pass" type="password" autocomplete="new-password"></div>
+      <div class="field"><label for="u-rol">Rol</label>
+        <select id="u-rol"><option value="digitador">digitador</option><option value="gerente">gerente</option><option value="admin">admin</option></select></div>
+    </div>
+    <div style="margin-top:12px"><button id="btn-usuario">Crear usuario</button></div>
+    <table style="margin-top:14px"><thead><tr><th>Usuario</th><th>Rol</th><th>Estado</th><th></th></tr></thead>
+      <tbody id="tbody-usuarios"><tr><td colspan="4" class="hint">—</td></tr></tbody></table>
+  </div>
+
+  <div class="card">
+    <h2>MDM: crear maestro / alias</h2>
+    <div class="field"><label for="mc-dominio">Dominio</label>
+      <select id="mc-dominio"><option value="contrato">contrato</option><option value="centro_costo">centro_costo</option>
+        <option value="item">item</option><option value="dependencia">dependencia</option>
+        <option value="sede">sede</option><option value="empleado">empleado</option></select></div>
+    <div class="field" style="margin-top:10px"><label for="mc-nombre">Nombre canónico del maestro</label><input id="mc-nombre"></div>
+    <div class="field" style="margin-top:10px"><label for="mc-area">Área actora (con permiso de creación)</label>
+      <input id="mc-area" placeholder="ej. finanzas, gerencia, rrhh"></div>
+    <div style="margin-top:12px"><button id="btn-maestro-crear">Crear maestro</button></div>
+    <hr style="margin:16px 0; border:none; border-top:1px solid var(--border)">
+    <div class="field"><label for="al-master">ID maestro</label><input id="al-master" inputmode="numeric" placeholder="master_id"></div>
+    <div class="field" style="margin-top:10px"><label for="al-alias">Alias (nombre alterno)</label><input id="al-alias" placeholder="ej. proyecto libano"></div>
+    <div style="margin-top:12px"><button id="btn-alias" class="btn ghost">Agregar alias</button></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Permisos por área (MDM)</h2>
+  <div class="grid">
+    <div class="field"><label for="p-area">Área</label><input id="p-area" placeholder="ej. compras"></div>
+    <div class="field"><label for="p-dominio">Dominio</label>
+      <select id="p-dominio"><option value="contrato">contrato</option><option value="centro_costo">centro_costo</option>
+        <option value="item">item</option><option value="dependencia">dependencia</option>
+        <option value="sede">sede</option><option value="empleado">empleado</option></select></div>
+    <div class="field"><label><input type="checkbox" id="p-crear"> Puede crear</label></div>
+    <div class="field"><label><input type="checkbox" id="p-editar"> Puede editar</label></div>
+  </div>
+  <div style="margin-top:12px"><button id="btn-permiso">Guardar permiso</button></div>
+  <table style="margin-top:14px"><thead><tr><th>Área</th><th>Dominio</th><th>Crear</th><th>Editar</th></tr></thead>
+    <tbody id="tbody-permisos"><tr><td colspan="4" class="hint">—</td></tr></tbody></table>
+</div>
+
+<div class="card">
+  <h2>Maestros MDM</h2>
+  <div class="field" style="max-width:280px"><label for="m-dominio">Ver dominio</label>
+    <select id="m-dominio">
+      <option value="contrato">contrato</option><option value="centro_costo">centro_costo</option>
+      <option value="item">item</option><option value="empleado">empleado</option>
+      <option value="dependencia">dependencia</option><option value="sede">sede</option>
+    </select></div>
+  <table style="margin-top:12px"><thead><tr><th>ID</th><th>Código</th><th>Nombre canónico</th><th>Área</th><th>Estado</th></tr></thead>
+    <tbody id="tbody-maestros"><tr><td colspan="5" class="hint">—</td></tr></tbody></table>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='configuracion.js') }}"></script>
+{% endblock %}

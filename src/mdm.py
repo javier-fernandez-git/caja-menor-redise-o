@@ -143,6 +143,25 @@ def puede(area, dominio, accion="crear"):
     return bool(fila and fila["permitido"])
 
 
+def actualizar_permiso(area, dominio, puede_crear, puede_editar):
+    """Crea o actualiza el permiso de un area sobre un dominio."""
+    if dominio not in DOMINIOS:
+        raise ValueError(f"Dominio desconocido: {dominio}")
+    with db.conectar() as conn:
+        conn.execute(
+            """
+            INSERT INTO mdm_permisos (area, dominio, puede_crear, puede_editar)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(area, dominio) DO UPDATE SET
+                puede_crear = excluded.puede_crear,
+                puede_editar = excluded.puede_editar
+            """,
+            (area.strip().lower(), dominio, 1 if puede_crear else 0,
+             1 if puede_editar else 0),
+        )
+    return True
+
+
 def listar_permisos(area=None):
     sql = "SELECT area, dominio, puede_crear, puede_editar FROM mdm_permisos"
     params = []

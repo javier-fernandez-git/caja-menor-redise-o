@@ -13,7 +13,7 @@ La versión de la app sube con cada etapa (ver `CHANGELOG.md` y `src/config.py`)
 | 2. Inteligencia operacional | 0.2.0 | ✅ Completada |
 | 3. Gobernanza de datos (MDM) | 0.3.0 | ✅ Completada |
 | 4. Capa analítica + PDF | 0.4.0 | ✅ Completada |
-| 5. UI para usuarios inconsistentes | 0.5.0 | ⏳ Pendiente |
+| 5. UI para usuarios inconsistentes | 0.5.0 | ✅ Completada |
 | 6. Memoria organizacional consultable | 0.6.0 | ⏳ Pendiente |
 | Estabilización y release | 1.0.0 | ⏳ Pendiente |
 
@@ -80,15 +80,26 @@ La versión de la app sube con cada etapa (ver `CHANGELOG.md` y `src/config.py`)
 
 ---
 
-## Etapa 5 — UI para usuarios inconsistentes  ⏳  (v0.5.0)
+## Etapa 5 — UI para usuarios inconsistentes  ✅  (v0.5.0)
 
 > Mínimo esfuerzo cognitivo, digitación rápida, industrial.
 
-- [ ] Separación física: registro operativo vs analítica gerencial
-- [ ] Autocompletar / sugerir / inferir / corregir en captura
-- [ ] Validación automática en formularios
-- [ ] Login y roles (`ui/login`)
-- [ ] Pantallas: dashboard, movimientos, resumen, liquidación, indicadores, configuración
+- [x] Separación física: registro operativo vs analítica gerencial
+      (rutas y APIs gobernadas por rol; digitador recibe 403 en analítica)
+- [x] Autocompletar (datalist) + homologación en vivo con chip de score
+- [x] Validación automática inline (submit deshabilitado hasta válido)
+- [x] Login y roles (`auth.py`, sesiones, `templates/login.html`)
+- [x] Pantallas: operativo (captura), gerencial (tablero/causal/alertas/PDF),
+      configuración (catálogos, MDM, equivalencias)
+
+### Cierre de Etapa 5 (huecos detectados en revisión)  ✅  (v0.5.1)
+
+- [x] Captura de **producción técnica** (unidades ejecutadas) desde la UI
+      + `POST /api/unidades-ejecutadas` + evento TECNICO (`tecnico_service`)
+- [x] Botón **PDF de liquidación por responsable** bien cableado en `/gerencial`
+- [x] **Gestión de usuarios** desde la UI (crear / activar / desactivar)
+- [x] **MDM desde la UI**: crear maestros, alias y editar permisos por área
+- [x] **Editar / eliminar** entradas de catálogo (no solo agregar)
 
 ---
 

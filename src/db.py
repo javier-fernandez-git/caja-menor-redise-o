@@ -190,6 +190,17 @@ def inicializar():
                 ultimo INTEGER NOT NULL DEFAULT 0
             );
             INSERT OR IGNORE INTO consecutivo_pdf (id, ultimo) VALUES (1, 0);
+
+            -- Usuarios y roles (separa registro operativo de analitica).
+            CREATE TABLE IF NOT EXISTS usuarios (
+                id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                usuario       TEXT NOT NULL UNIQUE,
+                password_hash TEXT NOT NULL,
+                rol           TEXT NOT NULL,   -- admin | gerente | digitador
+                nombre        TEXT,
+                activo        INTEGER NOT NULL DEFAULT 1,
+                creado_en     TEXT
+            );
         """)
 
         _migrar_movimientos_financieros(conn)
@@ -209,10 +220,12 @@ def inicializar():
     import normalizador
     import event_engine
     import mdm
+    import auth
     normalizador.sembrar_diccionario()
     event_engine.backfill_desde_movimientos()
     mdm.sembrar_permisos()
     mdm.sembrar_maestros_desde_catalogos()
+    auth.sembrar_usuarios_default()
 
 
 def _columnas_tabla(conn, tabla):

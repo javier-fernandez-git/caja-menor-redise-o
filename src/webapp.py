@@ -4,10 +4,14 @@ from flask import (
     jsonify,
     request,
     Response,
+    redirect,
+    url_for,
 )
 
+from datetime import date
 from pathlib import Path
 import db
+import auth
 
 # Capas nuevas (Etapa 1: nucleo)
 from services import (
@@ -18,6 +22,7 @@ from services import (
     analitica_service,
     prediccion_service,
     mdm_service,
+    tecnico_service,
 )
 import timeline_engine
 import event_engine
@@ -33,31 +38,133 @@ app = Flask(
     template_folder=str(BASE_DIR / "templates"),
     static_folder=str(BASE_DIR / "static")
 )
+app.secret_key = config.SECRET_KEY
 
 db.inicializar()
+
+
+# ---------------------------------------------------
+# CONTROL DE ACCESO (Etapa 5)
+# Separa registro operativo de analitica gerencial.
+# ---------------------------------------------------
+
+ANALITICA_PREFIJOS = (
+    "/api/tablero", "/api/causal", "/api/correlaciones", "/api/prediccion",
+    "/api/sobreconsumo", "/api/reportes", "/api/eventos", "/api/contabilidad",
+    "/api/timeline", "/api/dashboard", "/api/costos-unitarios",
+    "/api/resumen-tecnico",
+)
+CONFIG_PREFIJOS = ("/api/mdm", "/api/catalogo", "/api/homologar/equivalencia",
+                   "/api/usuarios")
+PUBLICO = ("/login", "/logout", "/static", "/favicon.ico")
+
+
+@app.context_processor
+def _inyectar_contexto():
+    return {"puede_ver": config.puede_ver, "user": auth.usuario_actual()}
+
+
+@app.before_request
+def _guardia_acceso():
+    ruta = request.path
+    if any(ruta.startswith(p) for p in PUBLICO):
+        return None
+
+    usuario = auth.usuario_actual()
+    if not usuario:
+        return auth._no_autorizado(False)
+
+    rol = usuario["rol"]
+    es_api = ruta.startswith("/api/")
+
+    def _denegar(pantalla):
+        if es_api:
+            return jsonify({"error": "rol sin permiso"}), 403
+        return redirect(url_for(config.INICIO_POR_ROL.get(rol, "login")))
+
+    if any(ruta.startswith(p) for p in CONFIG_PREFIJOS):
+        if not config.puede_ver(rol, "configuracion"):
+            return _denegar("configuracion")
+    elif any(ruta.startswith(p) for p in ANALITICA_PREFIJOS):
+        if not config.puede_ver(rol, "gerencial"):
+            return _denegar("gerencial")
+    return None
 
 
 # ---------------------------------------------------
 # FRONTEND
 # ---------------------------------------------------
 
+def _catalogos():
+    return dict(
+        responsables=db.obtener_responsables(),
+        obras=db.obtener_obras(),
+        centros=db.obtener_centros_de_costos(),
+        items=db.obtener_items(),
+        tipos=db.obtener_tipos_movimiento(),
+    )
+
+
 @app.route("/")
 def home():
+    usuario = auth.usuario_actual()
+    if not usuario:
+        return redirect(url_for("login"))
+    return redirect(url_for(config.INICIO_POR_ROL.get(usuario["rol"], "operativo")))
 
-    responsables = db.obtener_responsables()
-    obras = db.obtener_obras()
-    centros = db.obtener_centros_de_costos()
-    items = db.obtener_items()
-    tipos = db.obtener_tipos_movimiento()
 
-    return render_template(
-        "index.html",
-        responsables=responsables,
-        obras=obras,
-        centros=centros,
-        items=items,
-        tipos=tipos
-    )
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        user = auth.verificar(
+            request.form.get("usuario", ""), request.form.get("password", ""))
+        if user:
+            auth.iniciar_sesion(user)
+            destino = request.form.get("next") or url_for(
+                config.INICIO_POR_ROL.get(user["rol"], "operativo"))
+            return redirect(destino)
+        return render_template("login.html", error="Credenciales invalidas",
+                               next=request.form.get("next"))
+    if auth.usuario_actual():
+        return redirect(url_for("home"))
+    return render_template("login.html", next=request.args.get("next"))
+
+
+@app.route("/logout")
+def logout():
+    auth.cerrar_sesion()
+    return redirect(url_for("login"))
+
+
+@app.route("/operativo")
+@auth.rol_required("operativo")
+def operativo():
+    return render_template("operativo.html", pantalla="operativo",
+                           hoy=date.today().isoformat(), **_catalogos())
+
+
+@app.route("/gerencial")
+@auth.rol_required("gerencial")
+def gerencial():
+    return render_template("gerencial.html", pantalla="gerencial", **_catalogos())
+
+
+@app.route("/configuracion")
+@auth.rol_required("configuracion")
+def configuracion():
+    return render_template("configuracion.html", pantalla="configuracion",
+                           **_catalogos())
+
+
+@app.route("/guia")
+def guia():
+    """Guia de uso original."""
+    return render_template("index.html", **_catalogos())
+
+
+@app.route("/api/me")
+def api_me():
+    return jsonify(auth.usuario_actual() or {})
 
 
 # ---------------------------------------------------
@@ -418,6 +525,31 @@ def api_mdm_permisos():
     return jsonify(mdm_service.permisos(area=request.args.get("area")))
 
 
+# --- Alta en catalogos operativos (configuracion) ---
+_CATALOGO_MAP = {
+    "responsables": ("responsables", "nombre"),
+    "obras": ("obras", "nombre"),
+    "items": ("items", "nombre"),
+    "cc": ("centro_de_costos", "contrato"),
+}
+
+
+@app.route("/api/catalogo/<tipo>", methods=["POST"])
+def api_catalogo_agregar(tipo):
+    destino = _CATALOGO_MAP.get(tipo)
+    if not destino:
+        return jsonify({"ok": False, "error": "tipo invalido"}), 400
+    data = request.get_json(force=True, silent=True) or {}
+    nombre = (data.get("nombre") or "").strip().upper()
+    if not nombre:
+        return jsonify({"ok": False, "error": "nombre requerido"}), 400
+    tabla, columna = destino
+    with db.conectar() as conn:
+        conn.execute(
+            f"INSERT OR IGNORE INTO {tabla} ({columna}) VALUES (?)", (nombre,))
+    return jsonify({"ok": True})
+
+
 # --- Catalogo de equivalencias administrable ---
 @app.route("/api/homologar/equivalencia", methods=["POST"])
 def api_homologar_equivalencia():
@@ -483,6 +615,105 @@ def api_pdf_financiero():
 def api_pdf_trazabilidad():
     contenido = pdf_engine.generar_trazabilidad_pdf(**_filtros_temporales_simple())
     return _pdf_response(contenido, "trazabilidad.pdf")
+
+
+# ===================================================
+# CIERRE ETAPA 5 — completar operaciones desde la UI
+# ===================================================
+
+# --- Registro de produccion tecnica (operativo) ---
+@app.route("/api/unidades-ejecutadas", methods=["POST"])
+def api_registrar_unidad_ejecutada():
+    data = request.get_json(force=True, silent=True) or {}
+    try:
+        res = tecnico_service.registrar_unidad_ejecutada(
+            movimiento_id=data.get("movimiento_id"),
+            unidad_constructiva_id=data.get("unidad_constructiva_id"),
+            cantidad=data.get("cantidad"),
+            observacion=data.get("observacion"),
+            fecha=data.get("fecha"),
+            usuario=data.get("usuario"),
+        )
+        return jsonify({"ok": True, **res})
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"ok": False, "error": str(exc)}), 400
+
+
+# --- Gestion de usuarios (admin) ---
+@app.route("/api/usuarios")
+def api_usuarios_listar():
+    return jsonify(auth.listar_usuarios())
+
+
+@app.route("/api/usuarios", methods=["POST"])
+def api_usuarios_crear():
+    data = request.get_json(force=True, silent=True) or {}
+    try:
+        auth.crear_usuario(
+            usuario=data.get("usuario"),
+            password=data.get("password"),
+            rol=data.get("rol"),
+            nombre=data.get("nombre"),
+        )
+        return jsonify({"ok": True})
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"ok": False, "error": str(exc)}), 400
+
+
+@app.route("/api/usuarios/<int:usuario_id>/estado", methods=["POST"])
+def api_usuarios_estado(usuario_id):
+    data = request.get_json(force=True, silent=True) or {}
+    auth.cambiar_estado_usuario(usuario_id, bool(data.get("activo")))
+    return jsonify({"ok": True})
+
+
+# --- MDM: alta de maestros / permisos desde la UI ---
+@app.route("/api/mdm/permisos", methods=["POST"])
+def api_mdm_permisos_actualizar():
+    data = request.get_json(force=True, silent=True) or {}
+    try:
+        mdm_service.actualizar_permiso(
+            area=data.get("area"),
+            dominio=data.get("dominio"),
+            puede_crear=data.get("puede_crear"),
+            puede_editar=data.get("puede_editar"),
+        )
+        return jsonify({"ok": True})
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"ok": False, "error": str(exc)}), 400
+
+
+# --- Editar / eliminar catalogo ---
+@app.route("/api/catalogo/<tipo>/<int:item_id>", methods=["POST"])
+def api_catalogo_editar(tipo, item_id):
+    destino = _CATALOGO_MAP.get(tipo)
+    if not destino:
+        return jsonify({"ok": False, "error": "tipo invalido"}), 400
+    data = request.get_json(force=True, silent=True) or {}
+    nombre = (data.get("nombre") or "").strip().upper()
+    if not nombre:
+        return jsonify({"ok": False, "error": "nombre requerido"}), 400
+    tabla, columna = destino
+    with db.conectar() as conn:
+        conn.execute(f"UPDATE {tabla} SET {columna} = ? WHERE id = ?",
+                     (nombre, item_id))
+    return jsonify({"ok": True})
+
+
+@app.route("/api/catalogo/<tipo>/<int:item_id>", methods=["DELETE"])
+def api_catalogo_eliminar(tipo, item_id):
+    destino = _CATALOGO_MAP.get(tipo)
+    if not destino:
+        return jsonify({"ok": False, "error": "tipo invalido"}), 400
+    tabla, _ = destino
+    try:
+        with db.conectar() as conn:
+            conn.execute(f"DELETE FROM {tabla} WHERE id = ?", (item_id,))
+        return jsonify({"ok": True})
+    except Exception:  # noqa: BLE001 - normalmente FK en uso
+        return jsonify({"ok": False,
+                        "error": "No se puede eliminar: esta en uso por "
+                                 "movimientos u otros registros."}), 409
 
 
 # ---------------------------------------------------

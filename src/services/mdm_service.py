@@ -22,6 +22,10 @@ def permisos(area=None):
     return mdm.listar_permisos(area=area)
 
 
+def actualizar_permiso(area, dominio, puede_crear, puede_editar):
+    return mdm.actualizar_permiso(area, dominio, puede_crear, puede_editar)
+
+
 def dominios():
     return list(mdm.DOMINIOS.keys())
 

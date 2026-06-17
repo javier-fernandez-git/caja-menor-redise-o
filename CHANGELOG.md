@@ -9,7 +9,44 @@ La versión vive en `src/config.py` (`APP_VERSION`).
 ## [No publicado]
 
 ### Por hacer
-- Etapa 5 (UI), Etapa 6 (memoria consultable). Ver `ROADMAP.md`.
+- Etapa 6 (memoria organizacional consultable). Ver `ROADMAP.md`.
+
+## [0.5.1] — 2026-06-17 — Cierre de Etapa 5
+
+### Añadido
+- **Captura de producción técnica** desde la UI (`/operativo`): formulario de
+  unidades ejecutadas + `POST /api/unidades-ejecutadas`. `tecnico_service`
+  inserta y emite el evento TECNICO en vivo (lo ven timeline, costeo y analítica).
+- **PDF de liquidación por responsable** correctamente cableado en `/gerencial`
+  (selector de responsable que habilita el botón).
+- **Gestión de usuarios** en `/configuracion` (admin): crear, activar/desactivar.
+  Endpoints `/api/usuarios` (GET/POST) y `/api/usuarios/<id>/estado`.
+- **MDM desde la UI**: alta de maestros y alias, y **editor de permisos por área**
+  (`POST /api/mdm/permisos`, `mdm.actualizar_permiso`).
+- **Editar / eliminar catálogos**: `POST`/`DELETE /api/catalogo/<tipo>/<id>`
+  (la eliminación se bloquea con 409 si el registro está en uso).
+- Versión → **0.5.1**.
+
+## [0.5.0] — 2026-06-17 — Etapa 5: UI para usuarios inconsistentes
+
+### Añadido
+- **Autenticación y roles** (`auth.py`, tabla `usuarios`, sesiones Flask,
+  hash werkzeug). Roles: `digitador`, `gerente`, `admin`. Usuarios demo
+  sembrados (cambiar en producción).
+- **Separación operativo / gerencial**: guardia central (`before_request`) +
+  `rol_required`. Los digitadores NO acceden a la analítica (403 / redirect).
+- **UI operativa** (`/operativo`): captura rápida de movimientos con
+  autocompletar (datalist), **homologación en vivo** (chip de score
+  validado/inferido/sospechoso) y validación inline.
+- **UI gerencial** (`/gerencial`): tablero (saldo caja, costo obra, utilidad,
+  alertas), motor causal, top gastos, confiabilidad y enlaces a PDF.
+- **UI de configuración** (`/configuracion`, admin): alta de catálogos,
+  convergencia MDM (resolver), equivalencias y listado de maestros.
+- Pantalla de login, layout base con navegación según rol, tema industrial
+  (`static/app.css`).
+- Endpoints: `/login`, `/logout`, `/api/me`, `/api/catalogo/<tipo>` (POST).
+  La guía de uso original queda en `/guia`.
+- Versión → **0.5.0**.
 
 ## [0.4.0] — 2026-06-16 — Etapa 4: Analítica avanzada + PDF
 
@@ -92,6 +129,8 @@ La versión vive en `src/config.py` (`APP_VERSION`).
   movimientos existentes a la capa de eventos (backfill idempotente).
 
 [No publicado]: ./ROADMAP.md
+[0.5.1]: ./CHANGELOG.md
+[0.5.0]: ./CHANGELOG.md
 [0.4.0]: ./CHANGELOG.md
 [0.3.0]: ./CHANGELOG.md
 [0.2.0]: ./CHANGELOG.md
