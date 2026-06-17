@@ -14,10 +14,10 @@ Falta solo la fase de **estabilización y despliegue** hacia 1.0.0.
 ---
 ---
 
-# PARTE 1 — GUÍA DE REVISIÓN (sencilla)
+# PARTE 1 — GUÍA DE REVISIÓN
 
 > Objetivo: que puedas abrir la aplicación en tu computador, navegarla y entender
-> qué se construyó. No necesitas saber programar. Sigue los pasos en orden.
+> qué se construyó.
 
 ## Qué vas a ver
 Una aplicación web (se abre en el navegador, como una página) que reemplaza el
@@ -99,7 +99,7 @@ En la terminal donde está corriendo, presiona **Ctrl + C**. (Si usaste
 - *La página no abre* → revisa que la terminal diga "SERVIDOR WEB CAJA MENOR" y
   vuelve a entrar a http://127.0.0.1:8000.
 
-## Resumen macro: qué se construyó (en lenguaje de negocio)
+## Resumen macro: qué se construyó
 La aplicación dejó de ser "una caja menor" y se convirtió en un **sistema de
 reconstrucción histórica operacional-financiera**. Se hizo por etapas:
 
