@@ -14,7 +14,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-start "Caja Menor - Servidor Flask" cmd /k "cd /d ""%PROJECT_DIR%"" && python src\webapp.py"
+start "Sistema Operacional-Financiero - Servidor" cmd /k "cd /d ""%PROJECT_DIR%"" && python src\webapp.py"
 
 timeout /t 3 /nobreak >nul
 start "" "%APP_URL%"

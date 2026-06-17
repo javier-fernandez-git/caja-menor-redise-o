@@ -256,11 +256,16 @@ verdad, hay que cambiarlas. Eso es parte de la fase de estabilización (Parte 2)
   inversión sí ocurrió).
 - **MDM en una sola tabla por dominio** (`mdm_maestros`), en vez de cinco tablas
   `*_master`; subsume contrato/centro_costo/item/dependencia/sede/empleado.
-- **La base `data/caja_menor.db` está des-trackeada de git** mediante
-  `git update-index --skip-worktree` (se regenera en local desde los CSV). Por
-  eso NO aparece como modificada aunque la app la actualice. Implicación: los
-  datos reales capturados por la app **no están respaldados por git** → se
-  necesita una estrategia de backup propia.
+- **La base `data/caja_menor.db` sigue versionada** (committeada; el
+  `.gitignore` la incluye explícitamente con `!data/caja_menor.db`), pero los
+  **cambios locales se ignoran** mediante `git update-index --skip-worktree`.
+  Por eso NO aparece como modificada aunque la app la actualice, y la copia del
+  repo es un *snapshot* congelado. La base se regenera/siembra sola desde los
+  CSV en cada arranque. Implicación: los datos reales capturados por la app en
+  runtime **no se versionan ni están respaldados por git** → se necesita una
+  estrategia de backup propia.
+  - *(Para destrackearla de verdad: `git rm --cached data/caja_menor.db` y
+    quitar la línea `!data/caja_menor.db` del `.gitignore`.)*
 
 ## Pendiente — Estabilización hacia 1.0.0
 Bloqueantes para producción:

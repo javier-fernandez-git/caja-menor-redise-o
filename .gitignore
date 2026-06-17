@@ -1,6 +1,6 @@
 # =============================================================================
-# Caja Menor - .gitignore
-# Proyecto: 2026.04.11-caja-menor-actualizada
+# Sistema de Reconstruccion Operacional-Financiera - .gitignore
+# Proyecto: caja-menor-redise-o
 # Stack: Python + Flask + SQLite + VS Code + Windows + Git Bash
 # =============================================================================
 
@@ -61,10 +61,9 @@ flask_session/
 
 
 # -----------------------------------------------------------------------------
-# Recibos, PDFs, impresion y archivos generados
+# PDFs y documentos generados (la app los escribe en reports/)
 # -----------------------------------------------------------------------------
-recibos_pdf/
-recibos_imprimibles/
+reports/
 *.pdf
 *.tmp.pdf
 *.print.pdf
