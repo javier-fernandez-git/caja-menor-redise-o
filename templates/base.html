@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block titulo %}Sistema Operacional-Financiero{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+</head>
+<body>
+  <div class="topbar">
+    <span class="brand">RECONSTRUCCION OF</span>
+    <nav>
+      {% if puede_ver(user.rol, 'operativo') %}
+        <a href="{{ url_for('operativo') }}" class="{{ 'active' if pantalla=='operativo' }}">Registro operativo</a>
+      {% endif %}
+      {% if puede_ver(user.rol, 'gerencial') %}
+        <a href="{{ url_for('gerencial') }}" class="{{ 'active' if pantalla=='gerencial' }}">Analítica gerencial</a>
+        <a href="{{ url_for('memoria') }}" class="{{ 'active' if pantalla=='memoria' }}">Memoria</a>
+      {% endif %}
+      {% if puede_ver(user.rol, 'configuracion') %}
+        <a href="{{ url_for('configuracion') }}" class="{{ 'active' if pantalla=='configuracion' }}">Configuración</a>
+      {% endif %}
+    </nav>
+    <span class="spacer"></span>
+    <span class="user"><b>{{ user.nombre }}</b><span class="badge">{{ user.rol }}</span></span>
+    <a class="logout" href="{{ url_for('logout') }}">Salir</a>
+  </div>
+  <main>
+    {% block contenido %}{% endblock %}
+  </main>
+  <div id="toast" class="toast"></div>
+  <script>
+    function toast(msg, err) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.className = 'toast show' + (err ? ' err' : '');
+      setTimeout(() => t.className = 'toast', 3200);
+    }
+    function pesos(n) { return '$ ' + (Number(n)||0).toLocaleString('es-CO', {maximumFractionDigits:0}); }
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

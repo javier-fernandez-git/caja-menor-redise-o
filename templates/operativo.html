@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block titulo %}Registro operativo{% endblock %}
+{% block contenido %}
+<h1>Registro operativo</h1>
+<p class="sub">Digitación rápida. El sistema homologa, sugiere y valida automáticamente.</p>
+
+<div class="card">
+  <h2>Nuevo movimiento</h2>
+  <form id="form-mov">
+    <div class="grid">
+      <div class="field">
+        <label for="responsable_id">Responsable</label>
+        <select id="responsable_id" required>
+          <option value="">— Seleccione —</option>
+          {% for r in responsables %}<option value="{{ r.id }}">{{ r.nombre }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="tipo_id">Tipo de movimiento</label>
+        <select id="tipo_id" required>
+          <option value="">— Seleccione —</option>
+          {% for t in tipos %}<option value="{{ t.id }}">{{ t.texto }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="cc_id">Centro de costo</label>
+        <select id="cc_id">
+          <option value="">— Sin centro —</option>
+          {% for c in centros %}<option value="{{ c.id }}">{{ c.contrato }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="obra_id">Obra / Contrato</label>
+        <select id="obra_id">
+          <option value="">— Sin obra —</option>
+          {% for o in obras %}<option value="{{ o.id }}">{{ o.nombre }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="item_texto">Ítem / concepto</label>
+        <input id="item_texto" list="lista-items" autocomplete="off" placeholder="ej. mantto veh, gasolina…">
+        <datalist id="lista-items">
+          {% for i in items %}<option value="{{ i.nombre }}">{% endfor %}
+        </datalist>
+        <input type="hidden" id="item_id">
+        <span class="hint" id="homologacion-hint">Escribe el concepto; se homologa solo.</span>
+      </div>
+      <div class="field">
+        <label for="monto">Monto ($)</label>
+        <input id="monto" inputmode="numeric" placeholder="0" required>
+        <span class="hint" id="monto-hint"></span>
+      </div>
+      <div class="field">
+        <label for="fecha">Fecha</label>
+        <input id="fecha" type="date" required>
+      </div>
+      <div class="field">
+        <label for="soporte">Soporte (opcional)</label>
+        <input id="soporte" placeholder="No. factura / recibo">
+      </div>
+      <div class="field full">
+        <label for="observacion">Observación (opcional)</label>
+        <input id="observacion" placeholder="Detalle libre">
+      </div>
+    </div>
+    <div style="margin-top:16px; display:flex; gap:10px; align-items:center;">
+      <button type="submit" id="btn-guardar" disabled>Registrar movimiento</button>
+      <button type="button" class="btn ghost" id="btn-limpiar">Limpiar</button>
+      <span class="hint" id="form-estado"></span>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Registrar producción (unidad ejecutada)</h2>
+  <p class="hint">Asocia la producción física a un movimiento ya registrado. Se cruza con el gasto por fecha para el costo unitario.</p>
+  <form id="form-prod" style="margin-top:8px">
+    <div class="grid">
+      <div class="field full">
+        <label for="prod-mov">Movimiento asociado</label>
+        <select id="prod-mov" required><option value="">— Seleccione un recibo —</option></select>
+      </div>
+      <div class="field">
+        <label for="prod-unidad">Unidad constructiva</label>
+        <select id="prod-unidad" required><option value="">— Seleccione —</option></select>
+      </div>
+      <div class="field">
+        <label for="prod-cantidad">Cantidad ejecutada</label>
+        <input id="prod-cantidad" inputmode="decimal" placeholder="ej. 12.5" required>
+      </div>
+      <div class="field">
+        <label for="prod-fecha">Fecha</label>
+        <input id="prod-fecha" type="date" required>
+      </div>
+      <div class="field full">
+        <label for="prod-obs">Observación (opcional)</label>
+        <input id="prod-obs" placeholder="Detalle técnico">
+      </div>
+    </div>
+    <div style="margin-top:14px"><button type="submit" id="btn-prod" disabled>Registrar producción</button></div>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Últimos movimientos</h2>
+  <table>
+    <thead><tr><th>Recibo</th><th>Fecha</th><th>Responsable</th><th>Tipo</th><th>Ítem</th><th class="num">Monto</th></tr></thead>
+    <tbody id="tbody-mov"><tr><td colspan="6" class="hint">Cargando…</td></tr></tbody>
+  </table>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>window.HOY = "{{ hoy }}";</script>
+<script src="{{ url_for('static', filename='operativo.js') }}"></script>
+{% endblock %}
