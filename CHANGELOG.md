@@ -9,7 +9,28 @@ La versión vive en `src/config.py` (`APP_VERSION`).
 ## [No publicado]
 
 ### Por hacer
-- Etapa 4 (PDF), Etapa 5 (UI), Etapa 6 (memoria consultable). Ver `ROADMAP.md`.
+- Etapa 5 (UI), Etapa 6 (memoria consultable). Ver `ROADMAP.md`.
+
+## [0.4.0] — 2026-06-16 — Etapa 4: Analítica avanzada + PDF
+
+### Añadido
+- **Tablero gerencial** (`analitica_service.tablero_gerencial`): caja, costo de
+  obra, utilidad y facturación esperada (modelo económico), producción, top
+  gastos, indicadores de confiabilidad y alertas de sobreconsumo.
+- **Motor de PDF** (`pdf_engine`, fpdf2 + segno, sin dependencias nativas):
+  - `generar_liquidacion_pdf`: recibo con logo opcional, firmas (responsable y
+    supervisor), **código QR** de verificación y **consecutivo PDF propio**.
+  - `generar_reporte_financiero_pdf`: caja vs obra.
+  - `generar_trazabilidad_pdf`: timeline corporativo por contrato.
+- Consecutivo de documentos (`consecutivo_pdf`) independiente del recibo.
+- Endpoints: `/api/tablero`, `/api/reportes/liquidacion.pdf`,
+  `/api/reportes/financiero.pdf`, `/api/reportes/trazabilidad.pdf`.
+- Dependencias: `fpdf2`, `segno`.
+- Versión → **0.4.0**.
+
+### Corregido
+- `db.listar_movimientos` no incluía la columna `monto`, lo que rompía
+  `db.liquidacion` (bug latente). Ahora la selecciona.
 
 ## [0.3.0] — 2026-06-16 — Etapa 3: Gobernanza de datos (MDM)
 
@@ -71,6 +92,7 @@ La versión vive en `src/config.py` (`APP_VERSION`).
   movimientos existentes a la capa de eventos (backfill idempotente).
 
 [No publicado]: ./ROADMAP.md
+[0.4.0]: ./CHANGELOG.md
 [0.3.0]: ./CHANGELOG.md
 [0.2.0]: ./CHANGELOG.md
 [0.1.0]: ./CHANGELOG.md

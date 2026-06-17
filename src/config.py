@@ -13,11 +13,13 @@ Mapa de versiones <-> etapas del ROADMAP:
                     prediccion, deteccion de sobreconsumo)
     0.3.0  Etapa 3  Gobernanza de datos / MDM (maestros, convergencia de IDs,
                     permisos por area, equivalencias administrables)
+    0.4.0  Etapa 4  Analitica avanzada + PDF (tablero gerencial, liquidaciones,
+                    reportes financieros y trazabilidad con QR y consecutivo)
 """
 
 APP_NAME = "Sistema de Reconstruccion Operacional-Financiera"
-APP_VERSION = "0.3.0"
-ETAPA_ACTUAL = "Etapa 3 - Gobernanza de datos (MDM)"
+APP_VERSION = "0.4.0"
+ETAPA_ACTUAL = "Etapa 4 - Analitica avanzada + PDF"
 
 
 # ----------------------------------------------------------------------

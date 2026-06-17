@@ -183,6 +183,13 @@ def inicializar():
                 ON mdm_maestros(dominio, estado);
             CREATE INDEX IF NOT EXISTS idx_mdm_alias_dom
                 ON mdm_alias(dominio, alias);
+
+            -- Consecutivo propio de documentos PDF (distinto del recibo).
+            CREATE TABLE IF NOT EXISTS consecutivo_pdf (
+                id     INTEGER PRIMARY KEY CHECK(id = 1),
+                ultimo INTEGER NOT NULL DEFAULT 0
+            );
+            INSERT OR IGNORE INTO consecutivo_pdf (id, ultimo) VALUES (1, 0);
         """)
 
         _migrar_movimientos_financieros(conn)
@@ -623,6 +630,16 @@ def obtener_ultimo_consecutivo():
         return row["ultimo"] if row else 1000
 
 
+def siguiente_consecutivo_pdf():
+    """Consecutivo propio de los documentos PDF generados."""
+    with conectar() as conn:
+        conn.execute("UPDATE consecutivo_pdf SET ultimo = ultimo + 1 WHERE id = 1")
+        row = conn.execute(
+            "SELECT ultimo FROM consecutivo_pdf WHERE id = 1"
+        ).fetchone()
+        return row["ultimo"]
+
+
 # -------------------------------------------------------
 # CRUD de movimientos
 # -------------------------------------------------------
@@ -653,6 +670,7 @@ def listar_movimientos(responsable_id=None, obra_id=None,
             t.texto    AS tipo,
             i.nombre   AS item,
             c.contrato AS cc,
+            m.monto,
             m.observacion,
             m.soporte
         FROM movimientos m

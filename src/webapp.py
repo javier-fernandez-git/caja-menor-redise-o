@@ -2,7 +2,8 @@ from flask import (
     Flask,
     render_template,
     jsonify,
-    request
+    request,
+    Response,
 )
 
 from pathlib import Path
@@ -21,6 +22,7 @@ from services import (
 import timeline_engine
 import event_engine
 import config
+import pdf_engine
 from mdm import PermisoDenegado
 
 
@@ -427,6 +429,60 @@ def api_homologar_equivalencia():
         canonico_id=data.get("canonico_id"),
     )
     return jsonify({"ok": bool(ok)})
+
+
+# ===================================================
+# ETAPA 4 — ANALITICA AVANZADA + PDF
+# ===================================================
+
+@app.route("/api/tablero")
+def api_tablero():
+    return jsonify(analitica_service.tablero_gerencial(
+        responsable_id=request.args.get("responsable_id", type=int),
+        valor_contrato=request.args.get("valor_contrato", type=float),
+        duracion_dias=request.args.get("duracion_dias", type=int),
+        **_filtros_temporales_simple(),
+    ))
+
+
+def _pdf_response(contenido, nombre):
+    return Response(
+        contenido,
+        mimetype="application/pdf",
+        headers={"Content-Disposition": f'inline; filename="{nombre}"'},
+    )
+
+
+@app.route("/api/reportes/liquidacion.pdf")
+def api_pdf_liquidacion():
+    responsable_id = request.args.get("responsable_id", type=int)
+    if not responsable_id:
+        return jsonify({"error": "responsable_id requerido"}), 400
+    contenido = pdf_engine.generar_liquidacion_pdf(
+        responsable_id=responsable_id,
+        obra_id=request.args.get("obra_id", type=int)
+                or request.args.get("contrato_id", type=int),
+        cc_id=request.args.get("cc_id", type=int)
+              or request.args.get("centro_costo_id", type=int),
+        fecha_ini=request.args.get("fecha_ini"),
+        fecha_fin=request.args.get("fecha_fin"),
+    )
+    return _pdf_response(contenido, "liquidacion.pdf")
+
+
+@app.route("/api/reportes/financiero.pdf")
+def api_pdf_financiero():
+    contenido = pdf_engine.generar_reporte_financiero_pdf(
+        responsable_id=request.args.get("responsable_id", type=int),
+        **_filtros_temporales_simple(),
+    )
+    return _pdf_response(contenido, "reporte_financiero.pdf")
+
+
+@app.route("/api/reportes/trazabilidad.pdf")
+def api_pdf_trazabilidad():
+    contenido = pdf_engine.generar_trazabilidad_pdf(**_filtros_temporales_simple())
+    return _pdf_response(contenido, "trazabilidad.pdf")
 
 
 # ---------------------------------------------------

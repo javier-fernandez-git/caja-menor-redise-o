@@ -12,7 +12,7 @@ La versión de la app sube con cada etapa (ver `CHANGELOG.md` y `src/config.py`)
 | 1. Núcleo | 0.1.0 | ✅ Completada |
 | 2. Inteligencia operacional | 0.2.0 | ✅ Completada |
 | 3. Gobernanza de datos (MDM) | 0.3.0 | ✅ Completada |
-| 4. Capa analítica + PDF | 0.4.0 | ⏳ Pendiente |
+| 4. Capa analítica + PDF | 0.4.0 | ✅ Completada |
 | 5. UI para usuarios inconsistentes | 0.5.0 | ⏳ Pendiente |
 | 6. Memoria organizacional consultable | 0.6.0 | ⏳ Pendiente |
 | Estabilización y release | 1.0.0 | ⏳ Pendiente |
@@ -67,15 +67,16 @@ La versión de la app sube con cada etapa (ver `CHANGELOG.md` y `src/config.py`)
 
 ---
 
-## Etapa 4 — Capa analítica avanzada + PDF  ⏳  (v0.4.0)
+## Etapa 4 — Capa analítica avanzada + PDF  ✅  (v0.4.0)
 
 > Dashboards gerenciales y documentos.
 
-- [ ] Dashboard: utilidad, desviaciones, sobrecostos, producción,
-      facturación esperada, top gastos, alertas
-- [ ] `pdf_engine`: liquidaciones, reportes financieros, indicadores, trazabilidad
-- [ ] Liquidación con logo, firmas, QR y consecutivo
-- [ ] Reportes de trazabilidad temporal por contrato
+- [x] Tablero gerencial: utilidad, costo de obra, producción,
+      facturación esperada, top gastos, alertas (`analitica_service.tablero_gerencial`)
+- [x] `pdf_engine`: liquidaciones, reportes financieros, trazabilidad
+- [x] Liquidación con logo (opcional), firmas, QR y consecutivo PDF propio
+- [x] Reporte de trazabilidad temporal por contrato
+- [x] Endpoints `/api/tablero` y `/api/reportes/*.pdf`
 
 ---
 
